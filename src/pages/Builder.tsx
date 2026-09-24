@@ -237,7 +237,7 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
         )}
       </div>
       <aside className="lg:sticky lg:top-20 lg:h-fit">
-        <BuildSummary build={build} onSave={onSave} saved={saved} />
+        <BuildSummary build={build} onSave={onSave} saved={saved} onChangeSlots={setSlots} />
       </aside>
       {picker && (
         <ComponentPicker

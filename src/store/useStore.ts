@@ -55,6 +55,8 @@ interface State {
   drafts: Partial<Record<DeviceType, Build>>
   saved: Build[]
   compare: string[]
+  /** Composants sélectionnés pour la comparaison côte à côte (max 4). */
+  compareParts: string[]
   priceSettings: PriceSettings
   /** Composants / appareils importés par l'utilisateur ou synchronisés depuis le comparateur. */
   customComponents: PCComponent[]
@@ -62,6 +64,8 @@ interface State {
   theme: 'dark' | 'light'
   /** Coordonnées du vendeur et options des devis. */
   quoteInfo: QuoteInfo
+  /** Estimation du coût électrique : prix du kWh (€ TTC) et heures d'utilisation par jour. */
+  energy: { kWhPrice: number; hoursPerDay: number }
   quoteCounter: number
   /** Inclure la base étendue (données ouvertes) dans le configurateur et le catalogue. */
   useExtended: boolean
@@ -79,11 +83,14 @@ interface State {
   saveBuild: (b: Build) => Build
   deleteBuild: (id: string) => void
   toggleCompare: (id: string) => void
+  toggleComparePart: (id: string) => void
+  clearCompareParts: () => void
   setPriceSettings: (s: Partial<PriceSettings>) => void
   importCatalog: (components: PCComponent[], devices: Device[]) => void
   clearCustomCatalog: () => void
   toggleTheme: () => void
   setQuoteInfo: (q: Partial<QuoteInfo>) => void
+  setEnergy: (e: Partial<State['energy']>) => void
   nextQuoteNumber: () => string
   setUseExtended: (v: boolean) => void
   setExtra: (extra: PCComponent[], meta: State['extraMeta']) => void
@@ -96,11 +103,13 @@ export const useStore = create<State>()(
       drafts: {},
       saved: [],
       compare: [],
+      compareParts: [],
       priceSettings: DEFAULT_PRICE_SETTINGS,
       customComponents: [],
       customDevices: [],
       theme: 'dark',
       quoteInfo: DEFAULT_QUOTE_INFO,
+      energy: { kWhPrice: 0.2, hoursPerDay: 4 },
       quoteCounter: 0,
       useExtended: true,
       extra: [],
@@ -124,6 +133,9 @@ export const useStore = create<State>()(
       deleteBuild: (id) => set((s) => ({ saved: s.saved.filter((b) => b.id !== id), compare: s.compare.filter((c) => c !== id) })),
       toggleCompare: (id) =>
         set((s) => ({ compare: s.compare.includes(id) ? s.compare.filter((c) => c !== id) : [...s.compare, id].slice(-4) })),
+      toggleComparePart: (id) =>
+        set((s) => ({ compareParts: s.compareParts.includes(id) ? s.compareParts.filter((c) => c !== id) : [...s.compareParts, id].slice(-4) })),
+      clearCompareParts: () => set({ compareParts: [] }),
       setPriceSettings: (p) => set((s) => ({ priceSettings: { ...s.priceSettings, ...p } })),
       importCatalog: (components, devices) =>
         set((s) => {
@@ -134,6 +146,7 @@ export const useStore = create<State>()(
           return { customComponents: [...comp.values()], customDevices: [...dev.values()] }
         }),
       clearCustomCatalog: () => set({ customComponents: [], customDevices: [] }),
+      setEnergy: (e) => set((s) => ({ energy: { ...s.energy, ...e } })),
       setQuoteInfo: (q) => set((s) => ({ quoteInfo: { ...DEFAULT_QUOTE_INFO, ...s.quoteInfo, ...q } })),
       nextQuoteNumber: () => {
         const n = get().quoteCounter + 1

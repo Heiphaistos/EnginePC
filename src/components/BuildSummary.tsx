@@ -8,11 +8,12 @@ import { estimateAi, estimateGamingFps, scoreResolved } from '../engine/scoring'
 import { cn, formatCapacity } from '../lib/format'
 import { useCatalog } from '../store/catalog'
 import { useLivePrices } from '../store/usePrices'
-import type { Build } from '../types'
+import type { Build, BuildSlots } from '../types'
+import { AdvicePanel } from './AdvicePanel'
 import { ExportMenu } from './ExportMenu'
 import { ScoreBar, ScoreRing } from './Score'
 
-export function BuildSummary({ build, onSave, saved }: { build: Build; onSave?: () => void; saved?: boolean }) {
+export function BuildSummary({ build, onSave, saved, onChangeSlots }: { build: Build; onSave?: () => void; saved?: boolean; onChangeSlots?: (slots: BuildSlots) => void }) {
   const catalog = useCatalog()
   const resolved = useMemo(() => resolveBuild(build.slots, catalog), [build.slots, catalog])
   const items = useMemo(() => lineItems(resolved).map((l) => l.item), [resolved])
@@ -83,6 +84,8 @@ export function BuildSummary({ build, onSave, saved }: { build: Build; onSave?: 
           </ul>
         </div>
       )}
+
+      <AdvicePanel build={build} resolved={resolved} onApply={onChangeSlots} />
 
       <div className="card p-4">
         <div className="label mb-3">Performances par usage</div>

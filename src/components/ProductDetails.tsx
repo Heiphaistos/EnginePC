@@ -1,4 +1,6 @@
-import { BookOpen, ExternalLink, Info, Loader2, ShoppingCart, X } from 'lucide-react'
+import { BookOpen, Columns3, ExternalLink, Info, Loader2, ShoppingCart, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useStore } from '../store/useStore'
 import { Price } from './Price'
 import { useEffect, useState } from 'react'
 import { CATEGORY_LABELS } from '../data/catalog'
@@ -14,6 +16,24 @@ type Item = PCComponent | Device
 const isDevice = (i: Item): i is Device => 'deviceType' in i
 
 /** Fiche produit : caractéristiques, résumé Wikipédia, liens marchands et comparateur. */
+function CompareToggle({ id }: { id: string }) {
+  const selected = useStore((s) => s.compareParts.includes(id))
+  const count = useStore((s) => s.compareParts.length)
+  const toggle = useStore((s) => s.toggleComparePart)
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-2">
+      <button className={selected ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'} onClick={() => toggle(id)}>
+        <Columns3 className="h-3.5 w-3.5" /> {selected ? 'Dans le comparateur' : 'Ajouter au comparateur'}
+      </button>
+      {count > 0 && (
+        <Link to="/comparer" className="text-sm text-brand-400 underline">
+          Voir la comparaison ({count})
+        </Link>
+      )}
+    </div>
+  )
+}
+
 export function ProductDetails({ item, onClose }: { item: Item; onClose: () => void }) {
   const provider = usePriceProvider()
   const [wiki, setWiki] = useState<WikiSummary | null | 'loading' | 'error'>('loading')
@@ -110,6 +130,7 @@ export function ProductDetails({ item, onClose }: { item: Item; onClose: () => v
           )}
         </section>
 
+        {!isDevice(item) && <CompareToggle id={item.id} />}
         <section className="mt-5">
           <div className="label mb-2 flex items-center gap-1.5">
             <ShoppingCart className="h-3.5 w-3.5" /> Trouver le meilleur prix

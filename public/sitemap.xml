@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://enginepc.heiphaistos.org/</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/generer</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/catalogue</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/comparer</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/mes-configs</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/configurer/desktop</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/configurer/laptop</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/configurer/server</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/configurer/nas</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/configurer/tablet</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/configurer/phone</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/generer?type=laptop</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/generer?type=server</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/generer?type=nas</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/generer?type=tablet</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/generer?type=phone</loc><changefreq>weekly</changefreq></url>
+</urlset>

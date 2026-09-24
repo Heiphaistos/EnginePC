@@ -25,6 +25,7 @@ const NAV = [
   { to: '/generer', label: 'Générateur auto' },
   { to: '/configurer/desktop', label: 'Configurateur' },
   { to: '/catalogue', label: 'Catalogue' },
+  { to: '/comparer', label: 'Comparer' },
   { to: '/mes-configs', label: 'Mes configs' },
   { to: '/parametres', label: 'Paramètres' },
 ]
@@ -33,6 +34,7 @@ export function Layout() {
   const theme = useStore((s) => s.theme)
   const toggleTheme = useStore((s) => s.toggleTheme)
   const saved = useStore((s) => s.saved.length)
+  const compareCount = useStore((s) => s.compareParts.length)
   const [open, setOpen] = useState(false)
   const location = useLocation()
 
@@ -40,6 +42,20 @@ export function Layout() {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
   useEffect(() => setOpen(false), [location.pathname])
+  useEffect(() => {
+    const p = location.pathname
+    const page =
+      p === '/' ? 'Configurateur intelligent'
+      : p.startsWith('/generer') ? 'Générateur automatique'
+      : p.startsWith('/configurer') ? 'Configurateur'
+      : p.startsWith('/catalogue') ? 'Catalogue'
+      : p.startsWith('/comparer') ? 'Comparer des composants'
+      : p.startsWith('/mes-configs') ? 'Mes configurations'
+      : p.startsWith('/parametres') ? 'Paramètres'
+      : p.startsWith('/devis') ? 'Devis'
+      : 'Page introuvable'
+    document.title = `EnginePC — ${page}`
+  }, [location.pathname])
   useOpenData()
   const currency = useStore((s) => s.priceSettings.currency)
   const ratesDate = useStore((s) => s.rates.date)
@@ -59,7 +75,7 @@ export function Layout() {
               Engine<span className="gradient-text">PC</span>
             </span>
           </NavLink>
-          <nav className="hidden flex-1 items-center gap-1 md:flex">
+          <nav className="hidden flex-1 items-center gap-1 lg:flex">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
@@ -74,6 +90,9 @@ export function Layout() {
                 }
               >
                 {n.label}
+                {n.to === '/comparer' && compareCount > 0 && (
+                  <span className="ml-1.5 rounded-full bg-brand-500/20 px-1.5 text-xs text-brand-400">{compareCount}</span>
+                )}
                 {n.to === '/mes-configs' && saved > 0 && (
                   <span className="ml-1.5 rounded-full bg-brand-500/20 px-1.5 text-xs text-brand-400">{saved}</span>
                 )}
@@ -81,7 +100,7 @@ export function Layout() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <div className="card-soft flex p-0.5 text-xs font-semibold" role="group" aria-label="Affichage des prix">
+            <div className="card-soft hidden p-0.5 text-xs font-semibold sm:flex" role="group" aria-label="Affichage des prix">
               {(['ttc', 'ht', 'both'] as const).map((m) => (
                 <button
                   key={m}
@@ -96,13 +115,20 @@ export function Layout() {
             <button className="btn btn-ghost btn-sm" onClick={toggleTheme} aria-label="Changer de thème">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <button className="btn btn-ghost btn-sm md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
+            <button className="btn btn-ghost btn-sm lg:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </div>
         {open && (
-          <nav className="flex flex-col gap-1 border-t border-[var(--border)] px-4 py-3 md:hidden">
+          <nav className="flex flex-col gap-1 border-t border-[var(--border)] px-4 py-3 lg:hidden">
+            <div className="flex gap-1 pb-2 sm:hidden">
+              {(['ttc', 'ht', 'both'] as const).map((m) => (
+                <button key={m} onClick={() => setPriceSettings({ priceMode: m })} className={cn('btn btn-sm flex-1', mode === m ? 'btn-primary' : 'btn-ghost')}>
+                  {m === 'both' ? 'HT+TTC' : m.toUpperCase()}
+                </button>
+              ))}
+            </div>
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-[var(--bg-soft)]">
                 {n.label}
