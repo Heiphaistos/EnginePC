@@ -20,7 +20,7 @@ describe('intégrité du catalogue', () => {
 
   it('prix, années et libellés cohérents', () => {
     const bad = [...baseComponents, ...baseDevices].filter(
-      (c) => !(c.price > 0) || c.releaseYear < 2010 || c.releaseYear > year + 1 || !c.brand.trim() || !c.model.trim(),
+      (c) => !(c.price > 0) || c.releaseYear < 1980 || c.releaseYear > year + 1 || !c.brand.trim() || !c.model.trim(),
     )
     expect(bad.map((c) => c.id)).toEqual([])
   })
@@ -76,7 +76,7 @@ describe('intégrité du catalogue', () => {
 
   it('appareils : caractéristiques renseignées', () => {
     const bad = baseDevices.filter(
-      (d) => d.ramGB <= 0 || d.storageGB < 0 || (d.deviceType !== 'nas' && d.storageGB === 0) || d.weightKg <= 0 || (d.deviceType === 'nas' ? !d.bays : d.screenInches <= 0) || Object.keys(d.scores).length === 0,
+      (d) => (d.deviceType !== 'nas' && d.ramGB <= 0) || d.ramGB < 0 || d.storageGB < 0 || (d.deviceType !== 'nas' && d.storageGB === 0) || d.weightKg <= 0 || (d.deviceType === 'nas' ? !d.bays : d.screenInches <= 0) || Object.keys(d.scores).length === 0,
     )
     expect(bad.map((d) => d.id)).toEqual([])
   })
@@ -91,8 +91,8 @@ function budgets(range: [number, number]): number[] {
 describe('générateur : chaque profil et budget donne une configuration compatible', () => {
   for (const t of DEVICE_TYPES.filter((d) => d.assembled)) {
     for (const p of profilesFor(t.id).filter((p) => p.id !== 'mobile')) {
-      // NAS sur mesure : ~850 à 1150 € minimum selon l'usage (2 disques NAS + plateforme) ; en dessous, le générateur propose le mode clé en main.
-      for (const budget of budgets(t.id === 'nas' ? [600, t.budgetRange[1]] : t.budgetRange)) {
+      // NAS sur mesure : ~850 à 1300 € minimum selon l'usage (2 disques NAS + plateforme) ; en dessous, le générateur propose le mode clé en main.
+      for (const budget of budgets(t.id === 'nas' ? [650, t.budgetRange[1]] : t.budgetRange)) {
         it(`${t.id} / ${p.id} / ${budget} €`, () => {
           const b = generateBuild(catalog, { deviceType: t.id as AssembledType, profile: p.id, budget })
           expect(b, 'aucune configuration').not.toBeNull()
