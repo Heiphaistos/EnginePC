@@ -27,6 +27,9 @@ Production : https://enginepc.heiphaistos.org
 - **Devis** : devis imprimable numéroté (coordonnées vendeur, client, lignes modifiables, prestations,
   remise, HT / TVA / TTC, validité, conditions de paiement, bon pour accord).
 - **Mes configs** : sauvegarde locale, import JSON, comparaison côte à côte (jusqu'à 4).
+- **Conseils** : détection du goulot d'étranglement CPU/GPU, meilleure amélioration au meilleur coût,
+  économies à performances égales (appliquées en un clic), coût électrique annuel estimé.
+- **Comparateur de composants** : jusqu'à 4 pièces côte à côte, meilleures valeurs mises en évidence.
 - **Comparateur de prix** : prix live, liens produits et envoi de configurations — voir
   [docs/INTEGRATION.md](docs/INTEGRATION.md).
 - Thème sombre/clair, responsive mobile.

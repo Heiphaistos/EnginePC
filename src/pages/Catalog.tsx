@@ -12,6 +12,7 @@ import { useCatalog } from '../store/catalog'
 import type { ComponentCategory, Device, PCComponent } from '../types'
 import { ProductDetails } from '../components/ProductDetails'
 import { useStore } from '../store/useStore'
+import { Link } from 'react-router-dom'
 
 type Tab = ComponentCategory | Device['deviceType']
 const DEVICE_TABS: Device['deviceType'][] = ['laptop', 'tablet', 'phone', 'nas']
@@ -27,6 +28,8 @@ export function Catalog() {
   const [limit, setLimit] = useState(200)
   const [details, setDetails] = useState<PCComponent | Device | null>(null)
   const extraMeta = useStore((s) => s.extraMeta)
+  const compareParts = useStore((s) => s.compareParts)
+  const toggleComparePart = useStore((s) => s.toggleComparePart)
   const isDevice = (DEVICE_TABS as string[]).includes(tab)
 
   const rows = useMemo(() => {
@@ -111,11 +114,20 @@ export function Catalog() {
         )}
       </div>
 
+      {compareParts.length > 0 && (
+        <div className="card-soft mb-4 flex flex-wrap items-center gap-3 p-3 text-sm">
+          <span>{compareParts.length} composant(s) sélectionné(s) pour la comparaison</span>
+          <Link to="/comparer" className="btn btn-primary btn-sm ml-auto">
+            Comparer
+          </Link>
+        </div>
+      )}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="muted bg-[var(--bg-soft)] text-left text-xs uppercase tracking-wider">
               <tr>
+                {!isDevice && <th className="w-10 px-4 py-3" title="Comparer" />}
                 <th className="px-4 py-3">Produit</th>
                 <th className="px-4 py-3">Caractéristiques</th>
                 <th className="px-4 py-3">Gamme</th>
@@ -126,6 +138,11 @@ export function Catalog() {
             <tbody className="divide-y divide-[var(--border)]">
               {rows.slice(0, limit).map((r) => (
                 <tr key={r.id} className="cursor-pointer hover:bg-[var(--bg-soft)]" onClick={() => setDetails(r.item)}>
+                  {!isDevice && (
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" aria-label="Comparer" checked={compareParts.includes(r.id)} onChange={() => toggleComparePart(r.id)} />
+                    </td>
+                  )}
                   <td className="px-4 py-3 font-medium">
                     {r.name}
                     {r.open && <span className="chip ml-2 border-accent-500/40 text-accent-400">Base ouverte</span>}

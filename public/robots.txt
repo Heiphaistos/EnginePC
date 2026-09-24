@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /partage/
+Disallow: /devis/
+
+Sitemap: https://enginepc.heiphaistos.org/sitemap.xml
