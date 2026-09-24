@@ -28,7 +28,7 @@ export function BuildParts({ resolved, price, specs = true }: { resolved: Resolv
             </div>
             <div className="text-right text-sm font-semibold tabular-nums">{formatPrice((price ?? ((c) => c.price))(item) * qty)}</div>
             {link && (
-              <a href={link} target="_blank" rel="noreferrer" className="muted hover:text-brand-400" title="Voir les prix">
+              <a href={link} target="_blank" rel="noopener noreferrer" className="muted hover:text-brand-400" title="Voir les prix">
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             )}

@@ -6,16 +6,19 @@ import { BuildSummary } from '../components/BuildSummary'
 import { ComponentPicker } from '../components/ComponentPicker'
 import { DeviceCard } from '../components/DeviceCard'
 import { ExportMenu } from '../components/ExportMenu'
+import { PriceSource } from '../components/PriceTag'
 import { CategoryIcon, Icon } from '../components/Icon'
 import { ScoreBar, ScoreRing } from '../components/Score'
 import { CATEGORY_LABELS, CATEGORY_ORDER } from '../data/catalog'
 import { DEVICE_TYPE_BY_ID, DEVICE_TYPES, PROFILE_BY_ID, profilesFor } from '../data/profiles'
 import { displayName, lookup } from '../engine/catalog'
 import { autoComplete, checkBuild, REQUIRED, withComponent } from '../engine/compatibility'
+import { lineItems, resolveBuild } from '../engine/resolve'
 import { scoreDevice } from '../engine/scoring'
 import { cn, formatPrice } from '../lib/format'
 import { componentSpecs, deviceSpecs } from '../lib/specs'
 import { useCatalog } from '../store/catalog'
+import { useLivePrices } from '../store/usePrices'
 import { useStore } from '../store/useStore'
 import type { Build, BuildSlots, ComponentCategory, DeviceType, PCComponent, UsageProfile } from '../types'
 
@@ -58,10 +61,10 @@ export function Builder() {
       <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end">
         <div className="flex-1">
           <div className="label">Configuration {info.label}</div>
-          <input className="mt-1 w-full bg-transparent text-2xl font-bold outline-none md:text-3xl" value={build.name} onChange={(e) => update({ name: e.target.value })} />
+          <input aria-label="Nom de la configuration" className="mt-1 w-full bg-transparent text-2xl font-bold outline-none md:text-3xl" value={build.name} onChange={(e) => update({ name: e.target.value })} />
         </div>
         <div className="no-print flex flex-wrap gap-2">
-          <select className="input w-auto" value={build.profile} onChange={(e) => update({ profile: e.target.value as UsageProfile })}>
+          <select aria-label="Usage" className="input w-auto" value={build.profile} onChange={(e) => update({ profile: e.target.value as UsageProfile })}>
             {profilesFor(type).map((p) => (
               <option key={p.id} value={p.id}>
                 Usage : {p.label}
@@ -95,6 +98,8 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
   const required = REQUIRED[deviceType]
   const issues = useMemo(() => checkBuild(build.slots, catalog, deviceType), [build.slots, catalog, deviceType])
   const setSlots = (slots: BuildSlots) => update({ slots })
+  const selectedItems = useMemo(() => lineItems(resolveBuild(build.slots, catalog)).map((l) => l.item), [build.slots, catalog])
+  const prices = useLivePrices(selectedItems)
 
   const pick = (c: PCComponent) => {
     if (!picker) return
@@ -162,7 +167,7 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
                         ))}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2">
                       {cat === 'ram' && (
                         <div className="flex items-center gap-1 text-sm">
                           <button className="btn btn-ghost btn-sm px-2" onClick={() => setSlots({ ...build.slots, ramKits: Math.max(1, (build.slots.ramKits ?? 1) - 1) })}>
@@ -174,7 +179,10 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
                           </button>
                         </div>
                       )}
-                      <span className="w-24 text-right font-bold tabular-nums">{formatPrice(c.price * (cat === 'ram' ? build.slots.ramKits ?? 1 : 1))}</span>
+                      <div className="flex min-w-24 max-w-44 flex-col items-end text-right">
+                        <span className="font-bold tabular-nums">{formatPrice(prices.price(c) * (cat === 'ram' ? build.slots.ramKits ?? 1 : 1))}</span>
+                        <PriceSource offer={prices.offer(c.id)} converted={c.priceEstimated} />
+                      </div>
                       <button className="btn btn-ghost btn-sm no-print" onClick={() => setPicker({ category: cat, mode: 'replace', index: multi ? index : undefined })}>
                         Changer
                       </button>
@@ -219,7 +227,10 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
                   <div className="truncate font-medium">{displayName(a)}</div>
                   <div className="muted truncate text-xs">{componentSpecs(a).join(' · ')}</div>
                 </div>
-                <span className="font-bold tabular-nums">{formatPrice(a.price)}</span>
+                <div className="flex flex-col items-end text-right">
+                  <span className="font-bold tabular-nums">{formatPrice(prices.price(a))}</span>
+                  <PriceSource offer={prices.offer(a.id)} converted={a.priceEstimated} />
+                </div>
                 <button className="btn btn-ghost btn-sm no-print px-2" onClick={() => remove('accessory', index)} aria-label="Retirer">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -298,15 +309,15 @@ function DeviceBuilder({ build, update, onSave, saved }: { build: Build; update:
         <div className="card no-print mb-4 grid gap-2 p-4 md:grid-cols-[1fr_auto_auto]">
           <label className="relative">
             <Search className="muted pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-            <input className="input pl-9" placeholder="Rechercher (modèle, puce, OLED, 5G…)" value={q} onChange={(e) => setQ(e.target.value)} />
+            <input aria-label="Rechercher un appareil" className="input pl-9" placeholder="Rechercher (modèle, puce, OLED, 5G…)" value={q} onChange={(e) => setQ(e.target.value)} />
           </label>
-          <select className="input md:w-40" value={brand} onChange={(e) => setBrand(e.target.value)}>
+          <select aria-label="Marque" className="input md:w-40" value={brand} onChange={(e) => setBrand(e.target.value)}>
             <option value="">Toutes marques</option>
             {brands.map((b) => (
               <option key={b}>{b}</option>
             ))}
           </select>
-          <select className="input md:w-48" value={sort} onChange={(e) => setSort(e.target.value as DeviceSort)}>
+          <select aria-label="Tri" className="input md:w-48" value={sort} onChange={(e) => setSort(e.target.value as DeviceSort)}>
             <option value="score">Tri : score {PROFILE_BY_ID[build.profile].short}</option>
             <option value="value">Rapport qualité/prix</option>
             <option value="price-asc">Prix croissant</option>

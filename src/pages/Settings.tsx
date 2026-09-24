@@ -77,7 +77,7 @@ export function Settings() {
         <div className="mt-4 grid gap-3">
           <label className="grid gap-1 text-sm">
             <span className="label">URL du comparateur</span>
-            <input className="input" placeholder="https://prix.heiphaistos.org" value={form.baseUrl} onChange={(e) => setForm({ ...form, baseUrl: e.target.value.trim() })} />
+            <input className="input" placeholder="https://searchit.heiphaistos.org" value={form.baseUrl} onChange={(e) => setForm({ ...form, baseUrl: e.target.value.trim() })} />
           </label>
           <label className="grid gap-1 text-sm">
             <span className="label">Clé d’API (optionnelle)</span>
@@ -125,7 +125,7 @@ export function Settings() {
                   {extraMeta.status === 'error' && <span className="text-red-400">(indisponible)</span>}
                 </div>
                 <div className="muted text-xs">
-                  <a className="text-brand-400 underline" href="https://github.com/docyx/pc-part-dataset" target="_blank" rel="noreferrer">
+                  <a className="text-brand-400 underline" href="https://github.com/docyx/pc-part-dataset" target="_blank" rel="noopener noreferrer">
                     pc-part-dataset
                   </a>{' '}
                   (licence MIT) : pièces PC et périphériques, prix US convertis en euros TTC, certaines caractéristiques estimées.
@@ -140,7 +140,7 @@ export function Settings() {
           <li className="card-soft p-3">
             <div className="font-semibold">Taux de change — {rates.source}</div>
             <div className="muted text-xs">
-              Banque centrale européenne via api.frankfurter.app (gratuit, sans clé){rates.date && `, taux du ${rates.date}`}. {Object.keys(rates.rates).length} devises.
+              Banque centrale européenne via api.frankfurter.dev (gratuit, sans clé){rates.date && `, taux du ${rates.date}`}. {Object.keys(rates.rates).length} devises.
             </div>
           </li>
           <li className="card-soft p-3">

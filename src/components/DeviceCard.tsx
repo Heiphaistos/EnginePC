@@ -63,7 +63,7 @@ export function DeviceCard({
           <Info className="h-3.5 w-3.5" /> Fiche
         </button>
         {link && (
-          <a className="btn btn-ghost btn-sm" href={link} target="_blank" rel="noreferrer">
+          <a className="btn btn-ghost btn-sm" href={link} target="_blank" rel="noopener noreferrer">
             Prix <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}

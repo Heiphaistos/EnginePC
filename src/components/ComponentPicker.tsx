@@ -10,6 +10,7 @@ import { useCatalog } from '../store/catalog'
 import { useLivePrices } from '../store/usePrices'
 import type { AccessoryKind, BuildSlots, ComponentCategory, DeviceType, PCComponent, UsageProfile } from '../types'
 import { CategoryIcon } from './Icon'
+import { PriceSource, DemoPricesNotice } from './PriceTag'
 import { ProductDetails } from './ProductDetails'
 
 type SortKey = 'perf' | 'price-asc' | 'price-desc' | 'recent'
@@ -115,16 +116,17 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm md:items-center md:p-6" onClick={onClose}>
-      <div className="card flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden md:h-[85vh]" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="picker-title" className="card flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden md:h-[85vh]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-[var(--border)] p-4">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 text-brand-400">
             <CategoryIcon category={category} className="h-5 w-5" />
           </span>
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold">Choisir : {CATEGORY_LABELS[category]}</h2>
+          <div className="min-w-0 flex-1">
+            <h2 id="picker-title" className="text-lg font-semibold">Choisir : {CATEGORY_LABELS[category]}</h2>
             <p className="muted text-xs">
               {rows.length} résultat(s) sur {all.length} · compatibilité vérifiée en temps réel
             </p>
+            <DemoPricesNotice />
           </div>
           <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Fermer">
             <X className="h-4 w-4" />
@@ -134,32 +136,32 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
         <div className="grid gap-2 border-b border-[var(--border)] p-4 md:grid-cols-[1fr_auto_auto] lg:grid-cols-[1fr_auto_auto_auto_auto]">
           <label className="relative">
             <Search className="muted pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-            <input autoFocus className="input pl-9" placeholder="Rechercher un modèle, une spec (ex: 16 Go, AM5, 4.0)…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <input autoFocus aria-label="Rechercher un composant" className="input pl-9" placeholder="Rechercher un modèle, une spec (ex: 16 Go, AM5, 4.0)…" value={q} onChange={(e) => setQ(e.target.value)} />
           </label>
-          <select className="input md:w-40" value={brand} onChange={(e) => setBrand(e.target.value)}>
+          <select aria-label="Marque" className="input md:w-40" value={brand} onChange={(e) => setBrand(e.target.value)}>
             <option value="">Toutes marques</option>
             {brands.map((b) => (
               <option key={b}>{b}</option>
             ))}
           </select>
-          <select className="input md:w-44" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+          <select aria-label="Tri" className="input md:w-44" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
             <option value="perf">Tri : performance</option>
             <option value="price-asc">Prix croissant</option>
             <option value="price-desc">Prix décroissant</option>
             <option value="recent">Plus récents</option>
           </select>
-          <select className="input md:w-40" value={segment} onChange={(e) => setSegment(e.target.value as typeof segment)}>
+          <select aria-label="Segment" className="input md:w-40" value={segment} onChange={(e) => setSegment(e.target.value as typeof segment)}>
             <option value="all">Tous segments</option>
             <option value="consumer">Grand public</option>
             <option value="pro">Pro / serveur</option>
           </select>
-          <select className="input md:w-48" value={origin} onChange={(e) => setOrigin(e.target.value as typeof origin)}>
+          <select aria-label="Source des données" className="input md:w-48" value={origin} onChange={(e) => setOrigin(e.target.value as typeof origin)}>
             <option value="all">Toutes les sources</option>
             <option value="verified">Catalogue vérifié</option>
             <option value="open">Base ouverte (étendue)</option>
           </select>
           {kinds.length > 0 && (
-            <select className="input md:w-48" value={kind} onChange={(e) => setKind(e.target.value as AccessoryKind | '')}>
+            <select aria-label="Type de périphérique" className="input md:w-48" value={kind} onChange={(e) => setKind(e.target.value as AccessoryKind | '')}>
               <option value="">Tous les types</option>
               {kinds.map((k) => (
                 <option key={k} value={k}>
@@ -190,7 +192,6 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
           <ul className="grid gap-1.5">
             {visible.map(({ c, errors }) => {
               const selected = c.id === selectedId
-              const live = prices.isLive(c.id)
               return (
                 <li key={c.id} className="flex items-stretch gap-1.5">
                   <button
@@ -227,8 +228,9 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
                       )}
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold"><Price value={prices.price(c)} /></div>
-                      <div className={cn('text-[10px] uppercase tracking-wider', live ? 'text-emerald-400' : 'muted')}>{live ? 'Prix live' : c.priceEstimated ? 'Converti USD' : 'Indicatif'}</div>
+                      <div className="text-lg font-bold tabular-nums"><Price value={prices.price(c)} /></div>
+                      <PriceSource offer={prices.offer(c.id)} converted={c.priceEstimated} link={false} />
+)
                     </div>
                   </button>
                   <button className="card-soft muted px-2 hover:border-brand-500 hover:text-brand-400" onClick={() => setDetails(c)} aria-label="Fiche produit" title="Fiche produit">

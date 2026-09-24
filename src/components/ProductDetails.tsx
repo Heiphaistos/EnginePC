@@ -8,7 +8,8 @@ import { DEVICE_TYPE_BY_ID } from '../data/profiles'
 import { displayName } from '../engine/catalog'
 import { componentSpecs, deviceSpecs, TIER_LABELS } from '../lib/specs'
 import { fetchWikiSummary, merchantLinks, type WikiSummary } from '../services/openData'
-import { usePriceProvider } from '../store/usePrices'
+import { useLivePrices, usePriceProvider } from '../store/usePrices'
+import { PriceSource } from './PriceTag'
 import type { Device, PCComponent } from '../types'
 
 type Item = PCComponent | Device
@@ -36,6 +37,7 @@ function CompareToggle({ id }: { id: string }) {
 
 export function ProductDetails({ item, onClose }: { item: Item; onClose: () => void }) {
   const provider = usePriceProvider()
+  const live = useLivePrices(isDevice(item) ? [] : [item])
   const [wiki, setWiki] = useState<WikiSummary | null | 'loading' | 'error'>('loading')
   const name = displayName(item)
   const specs = isDevice(item) ? deviceSpecs(item) : componentSpecs(item)
@@ -69,17 +71,18 @@ export function ProductDetails({ item, onClose }: { item: Item; onClose: () => v
         onClose()
       }}
     >
-      <div className="card max-h-[92vh] w-full max-w-2xl overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="product-title" className="card max-h-[92vh] w-full max-w-2xl overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <div className="label">
               {category} · {item.brand} · {item.releaseYear}
             </div>
-            <h2 className="mt-1 text-2xl font-bold">{name}</h2>
+            <h2 id="product-title" className="mt-1 break-words text-2xl font-bold">{name}</h2>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-2xl font-bold"><Price value={item.price} /></span>
+              <span className="text-2xl font-bold tabular-nums"><Price value={isDevice(item) ? item.price : live.price(item)} /></span>
+              <PriceSource offer={live.offer(item.id)} converted={!isDevice(item) && item.priceEstimated} />
+)
               <span className="chip">{TIER_LABELS[item.tier]}</span>
-              {!isDevice(item) && item.priceEstimated && <span className="chip border-amber-500/40 text-amber-400">Prix converti (USD → EUR TTC)</span>}
               {!isDevice(item) && item.source && <span className="chip">Source : {item.source}</span>}
             </div>
           </div>
@@ -119,7 +122,7 @@ export function ProductDetails({ item, onClose }: { item: Item; onClose: () => v
                 <div className="font-semibold">{wiki.title}</div>
                 <p className="muted mt-1 line-clamp-5">{wiki.extract}</p>
                 {wiki.url && (
-                  <a className="mt-1 inline-flex items-center gap-1 text-xs text-brand-400" href={wiki.url} target="_blank" rel="noreferrer">
+                  <a className="mt-1 inline-flex items-center gap-1 text-xs text-brand-400" href={wiki.url} target="_blank" rel="noopener noreferrer">
                     Lire sur Wikipédia ({wiki.lang}) <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
@@ -137,12 +140,12 @@ export function ProductDetails({ item, onClose }: { item: Item; onClose: () => v
           </div>
           <div className="flex flex-wrap gap-2">
             {comparator && (
-              <a className="btn btn-primary btn-sm" href={comparator} target="_blank" rel="noreferrer">
+              <a className="btn btn-primary btn-sm" href={comparator} target="_blank" rel="noopener noreferrer">
                 Notre comparateur <ExternalLink className="h-3.5 w-3.5" />
               </a>
             )}
             {merchantLinks(name).map((m) => (
-              <a key={m.label} className="btn btn-ghost btn-sm" href={m.url} target="_blank" rel="noreferrer nofollow">
+              <a key={m.label} className="btn btn-ghost btn-sm" href={m.url} target="_blank" rel="noopener noreferrer nofollow">
                 {m.label}
               </a>
             ))}

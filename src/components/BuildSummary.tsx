@@ -11,6 +11,7 @@ import { useLivePrices } from '../store/usePrices'
 import type { Build, BuildSlots } from '../types'
 import { AdvicePanel } from './AdvicePanel'
 import { ExportMenu } from './ExportMenu'
+import { DemoPricesNotice } from './PriceTag'
 import { ScoreBar, ScoreRing } from './Score'
 
 export function BuildSummary({ build, onSave, saved, onChangeSlots }: { build: Build; onSave?: () => void; saved?: boolean; onChangeSlots?: (slots: BuildSlots) => void }) {
@@ -36,11 +37,18 @@ export function BuildSummary({ build, onSave, saved, onChangeSlots }: { build: B
           <ScoreRing value={score} />
           <div className="min-w-0 flex-1">
             <div className="label">Score {PROFILE_BY_ID[build.profile].label}</div>
-            <div className="mt-1 text-3xl font-bold"><Price value={total} subClassName="text-sm" /></div>
-            <div className="muted text-xs">
-              {items.length} composant(s) · {prices.loading ? 'mise à jour des prix…' : prices.results.size ? `${prices.results.size} prix live` : 'prix indicatifs'}
+            <div className="mt-1 text-3xl font-bold tabular-nums"><Price value={total} subClassName="text-sm" /></div>
+            <div className="muted text-xs" aria-live="polite">
+              {items.length} composant(s) ·{' '}
+              {prices.loading
+                ? 'mise à jour des prix…'
+                : prices.results.size
+                  ? `${prices.results.size} prix live, ${items.length - prices.results.size} indicatif(s)`
+                  : 'prix indicatifs'}
+)
             </div>
-            {prices.error && <div className="text-xs text-amber-400">Comparateur indisponible : prix indicatifs</div>}
+            {prices.error && <div className="text-xs text-amber-500">Comparateur indisponible ({prices.error}) : prix indicatifs affichés</div>}
+            {prices.results.size > 0 && <DemoPricesNotice className="mt-1" />}
           </div>
         </div>
         <div

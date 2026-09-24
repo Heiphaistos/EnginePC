@@ -50,6 +50,14 @@ Réponse :
 Les produits non trouvés peuvent simplement être omis. EnginePC regroupe les produits d'une configuration
 dans une seule requête et met les résultats en cache pendant la session.
 
+Côté EnginePC : requêtes groupées (100 produits max), temporisées (300 ms), délai max 10 s ; après un échec,
+le comparateur n'est pas réinterrogé pendant 60 s et les prix indicatifs restent affichés. Seules les offres en EUR
+avec un lien `http(s)` sont retenues ; chaque prix live affiche le marchand, la date (`updatedAt`) et un lien vers l'offre.
+
+### `GET /api/health` (optionnel)
+
+Si la réponse JSON contient `"demo": true`, EnginePC signale discrètement que les prix du comparateur sont fictifs.
+
 ## 2. `GET /api/v1/catalog` (optionnel)
 
 Permet au comparateur d'ajouter ou de mettre à jour des produits dans EnginePC (bouton

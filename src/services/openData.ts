@@ -2,7 +2,7 @@
  * Chargement des données ouvertes et API gratuites (sans clé, CORS autorisé) :
  *  - /data/extra-catalog.json : base étendue générée par `npm run sync` (pc-part-dataset, MIT)
  *  - /data/rates.json          : taux BCE générés par la synchro (secours hors ligne)
- *  - api.frankfurter.app       : taux de change BCE en direct
+ *  - api.frankfurter.dev       : taux de change BCE en direct
  *  - Wikipédia (REST)          : description et photo des produits
  */
 import type { PCComponent } from '../types'
@@ -37,7 +37,7 @@ export async function fetchRates(signal?: AbortSignal): Promise<Rates> {
     /* cache illisible : on recharge */
   }
   try {
-    const res = await fetch('https://api.frankfurter.app/latest?from=EUR', { signal })
+    const res = await fetch('https://api.frankfurter.dev/v1/latest?from=EUR', { signal })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const d = (await res.json()) as { date: string; rates: Record<string, number> }
     const rates: Rates = { base: 'EUR', rates: { EUR: 1, ...d.rates }, source: 'BCE via Frankfurter', date: d.date }

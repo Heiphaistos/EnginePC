@@ -161,7 +161,14 @@ export const useStore = create<State>()(
     }),
     {
       name: 'enginepc',
-      version: 1,
+      version: 2,
+      // v2 : les configurations enregistrées avant l'arrivée du comparateur avaient une URL vide ;
+      // on leur applique l'URL de build (VITE_PRICE_API_URL). Une URL saisie à la main est conservée.
+      migrate: (persisted, from) => {
+        const s = persisted as Partial<State>
+        if (from < 2 && s.priceSettings && !s.priceSettings.baseUrl) s.priceSettings = { ...s.priceSettings, baseUrl: DEFAULT_PRICE_SETTINGS.baseUrl }
+        return s as State
+      },
       partialize: ({ extra: _e, extraMeta: _m, rates: _r, ...rest }) => rest,
     },
   ),

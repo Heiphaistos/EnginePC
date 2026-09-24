@@ -65,7 +65,7 @@ export function ExportMenu({ build, price, compact }: { build: Build; price?: (c
             </button>
           ))}
           {buildLink && (
-            <a href={buildLink} target="_blank" rel="noreferrer" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-[var(--bg-soft)]">
+            <a href={buildLink} target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-[var(--bg-soft)]">
               <ShoppingCart className="h-4 w-4 text-emerald-400" /> Envoyer au comparateur
             </a>
           )}
