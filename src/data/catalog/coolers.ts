@@ -18,6 +18,14 @@ export const coolers: Cooler[] = [
   cooler({ id: 'noctua-nh-u12a', brand: 'Noctua', model: 'NH-U12A', price: 130, releaseYear: 2019, tier: 'performance', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 158, maxTdp: 220 }),
   cooler({ id: 'bequiet-dark-rock-pro-5', brand: 'be quiet!', model: 'Dark Rock Pro 5', price: 95, releaseYear: 2023, tier: 'enthusiast', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 168, maxTdp: 270 }),
   cooler({ id: 'noctua-nh-d15-g2', brand: 'Noctua', model: 'NH-D15 G2', price: 150, releaseYear: 2024, tier: 'flagship', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 168, maxTdp: 280 }),
+  cooler({ id: 'arctic-freezer-36-argb', brand: 'Arctic', model: 'Freezer 36 A-RGB', price: 40, releaseYear: 2023, tier: 'entry', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 159, maxTdp: 200 }),
+  cooler({ id: 'id-cooling-se-224-xts', brand: 'ID-Cooling', model: 'SE-224-XTS', price: 25, releaseYear: 2022, tier: 'entry', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 154, maxTdp: 200 }),
+  cooler({ id: 'bequiet-pure-rock-3', brand: 'be quiet!', model: 'Pure Rock 3', price: 45, releaseYear: 2025, tier: 'mainstream', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 159, maxTdp: 200 }),
+  cooler({ id: 'thermalright-phantom-spirit-120-evo', brand: 'Thermalright', model: 'Phantom Spirit 120 EVO', price: 55, releaseYear: 2024, tier: 'mainstream', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 157, maxTdp: 270 }),
+  cooler({ id: 'deepcool-ak500', brand: 'Deepcool', model: 'AK500', price: 60, releaseYear: 2022, tier: 'mainstream', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 158, maxTdp: 240 }),
+  cooler({ id: 'deepcool-assassin-iv', brand: 'Deepcool', model: 'Assassin IV', price: 100, releaseYear: 2023, tier: 'enthusiast', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 164, maxTdp: 280 }),
+  cooler({ id: 'noctua-nh-u12s-redux', brand: 'Noctua', model: 'NH-U12S redux', price: 55, releaseYear: 2021, tier: 'mainstream', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 158, maxTdp: 180 }),
+  cooler({ id: 'noctua-nh-d12l', brand: 'Noctua', model: 'NH-D12L', price: 100, releaseYear: 2021, tier: 'performance', segment: 'consumer', type: 'air', sockets: CONSUMER, heightMm: 145, maxTdp: 200 }),
 
   // ───────── Watercooling AIO ─────────
   cooler({ id: 'arctic-liquid-freezer-iii-pro-240', brand: 'Arctic', model: 'Liquid Freezer III Pro 240', price: 85, releaseYear: 2024, tier: 'mainstream', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 240, maxTdp: 280 }),
@@ -30,6 +38,13 @@ export const coolers: Cooler[] = [
   cooler({ id: 'corsair-icue-link-h100i-rgb', brand: 'Corsair', model: 'iCUE LINK H100i RGB', price: 150, releaseYear: 2023, tier: 'mainstream', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 240, maxTdp: 270 }),
   cooler({ id: 'corsair-icue-link-h150i-rgb', brand: 'Corsair', model: 'iCUE LINK H150i RGB', price: 190, releaseYear: 2023, tier: 'enthusiast', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 360, maxTdp: 330 }),
   cooler({ id: 'lianli-galahad-ii-trinity-360', brand: 'Lian Li', model: 'Galahad II Trinity 360', price: 150, releaseYear: 2023, tier: 'performance', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 360, maxTdp: 330 }),
+  cooler({ id: 'arctic-liquid-freezer-iii-240', brand: 'Arctic', model: 'Liquid Freezer III 240', price: 75, releaseYear: 2024, tier: 'mainstream', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 240, maxTdp: 270 }),
+  cooler({ id: 'arctic-liquid-freezer-iii-280', brand: 'Arctic', model: 'Liquid Freezer III 280', price: 90, releaseYear: 2024, tier: 'performance', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 280, maxTdp: 310 }),
+  cooler({ id: 'thermalright-frozen-notte-360-argb', brand: 'Thermalright', model: 'Frozen Notte 360 ARGB', price: 75, releaseYear: 2024, tier: 'mainstream', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 360, maxTdp: 300 }),
+  cooler({ id: 'deepcool-lt520', brand: 'Deepcool', model: 'LT520', price: 110, releaseYear: 2023, tier: 'mainstream', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 240, maxTdp: 270 }),
+  cooler({ id: 'bequiet-silent-loop-3-360', brand: 'be quiet!', model: 'Silent Loop 3 360', price: 150, releaseYear: 2024, tier: 'performance', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 360, maxTdp: 330 }),
+  cooler({ id: 'nzxt-kraken-elite-240', brand: 'NZXT', model: 'Kraken Elite 240 (2024)', price: 230, releaseYear: 2024, tier: 'performance', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 240, maxTdp: 280 }),
+  cooler({ id: 'corsair-nautilus-360-rs', brand: 'Corsair', model: 'Nautilus 360 RS', price: 100, releaseYear: 2025, tier: 'mainstream', segment: 'consumer', type: 'aio', sockets: CONSUMER, radiatorMm: 360, maxTdp: 310 }),
 
   // ───────── Stations de travail (sTR5 / SP6 / LGA4677 / SP5) ─────────
   cooler({ id: 'noctua-nh-u14s-tr5-sp6', brand: 'Noctua', model: 'NH-U14S TR5-SP6', price: 130, releaseYear: 2023, tier: 'enthusiast', segment: 'workstation', type: 'air', sockets: ['sTR5', 'SP6'], heightMm: 165, maxTdp: 350 }),
