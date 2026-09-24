@@ -298,7 +298,6 @@ export const morePeripherals: Accessory[] = [
   acc('per-seagate-one-touch-ssd-1tb', 'external-storage', 'Seagate', 'One Touch SSD 1 To', 110, 2021, 'mainstream', ['SSD', '1030 Mo/s', 'USB-C 3.2 Gen 2']),
 
   // ——— Systèmes d'exploitation ———
-  acc('per-canonical-ubuntu-24-04-lts', 'os', 'Canonical', 'Ubuntu 24.04 LTS', 0, 2024, 'entry', ['Linux gratuit', 'Support 5 ans (LTS)', 'Téléchargement']),
   acc('per-microsoft-windows-11-famille-retail', 'os', 'Microsoft', 'Windows 11 Famille (boîte, clé USB)', 145, 2021, 'mainstream', ['Licence Retail transférable', 'Clé USB', '1 PC']),
   acc('per-microsoft-windows-11-pro-workstations', 'os', 'Microsoft', 'Windows 11 Pro for Workstations OEM', 300, 2021, 'enthusiast', ['Licence OEM', 'ReFS, SMB Direct, jusqu’à 4 CPU / 6 To RAM', '1 PC']),
   acc('per-microsoft-windows-server-2025-essentials', 'os', 'Microsoft', 'Windows Server 2025 Essentials OEM', 500, 2024, 'flagship', ['Jusqu’à 25 utilisateurs / 50 appareils', '1 CPU (10 cœurs max)', 'CAL incluses']),
