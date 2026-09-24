@@ -275,7 +275,9 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
     const hdds = p.storages.filter((s) => s.kind === 'hdd' && s.nasRated)
     const hddBudget = rest * weights.storage - (boot?.price ?? 0)
     const wantTB = prefs.minStorageTB ?? 0
-    const maxBays = Math.max(0, ...p.cases.map((c) => c.driveBays35))
+    // Nombre de disques limité par les baies ET par les ports SATA disponibles (carte mère + meilleur HBA).
+    const maxHbaPorts = Math.max(0, ...p.hbas.map((h) => h.ports))
+    const maxBays = Math.min(Math.max(0, ...p.cases.map((c) => c.driveBays35)), mb.sataPorts + maxHbaPorts)
     let bestHdd: { d: Storage; n: number; tb: number } | undefined
     for (const d of hdds) {
       for (let n = 2; n <= Math.min(24, maxBays); n += 1) {
