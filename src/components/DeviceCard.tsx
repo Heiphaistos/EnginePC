@@ -1,7 +1,8 @@
 import { Check, ExternalLink, Info } from 'lucide-react'
+import { Price } from './Price'
 import { useState } from 'react'
 import { ProductDetails } from './ProductDetails'
-import { cn, formatPrice } from '../lib/format'
+import { cn } from '../lib/format'
 import { deviceSpecs } from '../lib/specs'
 import { usePriceProvider } from '../store/usePrices'
 import type { Device } from '../types'
@@ -32,7 +33,7 @@ export function DeviceCard({
             {device.brand} · {device.releaseYear}
           </div>
           <h3 className="mt-0.5 font-semibold leading-snug">{device.model}</h3>
-          <div className="mt-2 text-2xl font-bold tabular-nums">{formatPrice(device.price)}</div>
+          <div className="mt-2 text-2xl font-bold"><Price value={device.price} /></div>
         </div>
         <ScoreRing value={score} size={72} />
       </div>

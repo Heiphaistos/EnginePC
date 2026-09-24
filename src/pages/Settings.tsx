@@ -1,5 +1,6 @@
 import { CheckCircle2, Database, Loader2, Plug, Trash2, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { QuoteSection, TaxSection } from './SettingsSections'
 import { createPriceProvider } from '../services/pricing'
 import { useCatalog } from '../store/catalog'
 import { useStore } from '../store/useStore'
@@ -62,6 +63,9 @@ export function Settings() {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-3xl font-bold">Paramètres</h1>
 
+      <TaxSection />
+      <QuoteSection />
+
       <section className="card mt-6 p-6">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <Plug className="h-5 w-5 text-brand-400" /> Connexion au comparateur de prix
@@ -79,27 +83,9 @@ export function Settings() {
             <span className="label">Clé d’API (optionnelle)</span>
             <input className="input" type="password" value={form.apiKey ?? ''} onChange={(e) => setForm({ ...form, apiKey: e.target.value || undefined })} />
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="grid gap-1 text-sm">
-              <span className="label">Pays</span>
-              <select className="input" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}>
-                {['FR', 'BE', 'CH', 'LU', 'DE', 'ES', 'IT', 'CA', 'US', 'UK'].map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1 text-sm">
-              <span className="label">Devise</span>
-              <select className="input" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-                {['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'JPY', 'PLN', 'SEK', 'DKK', 'NOK', 'CZK', 'AUD'].filter((c) => c === 'EUR' || rates.rates[c]).map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
-          </div>
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-2">
-          <button className="btn btn-primary" onClick={() => setPriceSettings(form)}>
+          <button className="btn btn-primary" onClick={() => setPriceSettings({ baseUrl: form.baseUrl, apiKey: form.apiKey })}>
             Enregistrer
           </button>
           <button className="btn btn-ghost" onClick={runTest} disabled={!form.baseUrl}>

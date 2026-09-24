@@ -1,11 +1,12 @@
 import { Download, Search } from 'lucide-react'
+import { Price } from '../components/Price'
 import { useMemo, useState } from 'react'
 import { CategoryIcon, Icon } from '../components/Icon'
 import { CATEGORY_LABELS, CATEGORY_ORDER } from '../data/catalog'
 import { DEVICE_TYPE_BY_ID } from '../data/profiles'
 import { displayName } from '../engine/catalog'
 import { download } from '../lib/export'
-import { cn, formatPrice } from '../lib/format'
+import { cn } from '../lib/format'
 import { ACCESSORY_LABELS, componentSpecs, deviceSpecs, TIER_LABELS } from '../lib/specs'
 import { useCatalog } from '../store/catalog'
 import type { ComponentCategory, Device, PCComponent } from '../types'
@@ -140,7 +141,7 @@ export function Catalog() {
                   </td>
                   <td className="muted whitespace-nowrap px-4 py-3 text-xs">{TIER_LABELS[r.tier]}</td>
                   <td className="muted px-4 py-3 text-right tabular-nums">{r.year}</td>
-                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{formatPrice(r.price)}</td>
+                  <td className="px-4 py-3 text-right font-semibold"><Price value={r.price} /></td>
                 </tr>
               ))}
             </tbody>

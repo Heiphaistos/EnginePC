@@ -1,9 +1,9 @@
 import { BookOpen, ExternalLink, Info, Loader2, ShoppingCart, X } from 'lucide-react'
+import { Price } from './Price'
 import { useEffect, useState } from 'react'
 import { CATEGORY_LABELS } from '../data/catalog'
 import { DEVICE_TYPE_BY_ID } from '../data/profiles'
 import { displayName } from '../engine/catalog'
-import { formatPrice } from '../lib/format'
 import { componentSpecs, deviceSpecs, TIER_LABELS } from '../lib/specs'
 import { fetchWikiSummary, merchantLinks, type WikiSummary } from '../services/openData'
 import { usePriceProvider } from '../store/usePrices'
@@ -57,7 +57,7 @@ export function ProductDetails({ item, onClose }: { item: Item; onClose: () => v
             </div>
             <h2 className="mt-1 text-2xl font-bold">{name}</h2>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-2xl font-bold tabular-nums">{formatPrice(item.price)}</span>
+              <span className="text-2xl font-bold"><Price value={item.price} /></span>
               <span className="chip">{TIER_LABELS[item.tier]}</span>
               {!isDevice(item) && item.priceEstimated && <span className="chip border-amber-500/40 text-amber-400">Prix converti (USD → EUR TTC)</span>}
               {!isDevice(item) && item.source && <span className="chip">Source : {item.source}</span>}

@@ -1,4 +1,5 @@
 import { AlertTriangle, Check, Info, Search, X } from 'lucide-react'
+import { Price } from './Price'
 import { useEffect, useMemo, useState } from 'react'
 import { CATEGORY_LABELS } from '../data/catalog'
 import { displayName } from '../engine/catalog'
@@ -226,7 +227,7 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
                       )}
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold tabular-nums">{formatPrice(prices.price(c))}</div>
+                      <div className="text-lg font-bold"><Price value={prices.price(c)} /></div>
                       <div className={cn('text-[10px] uppercase tracking-wider', live ? 'text-emerald-400' : 'muted')}>{live ? 'Prix live' : c.priceEstimated ? 'Converti USD' : 'Indicatif'}</div>
                     </div>
                   </button>

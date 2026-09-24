@@ -6,6 +6,7 @@ import { Generator } from './pages/Generator'
 import { Home } from './pages/Home'
 import { Saved } from './pages/Saved'
 import { Settings } from './pages/Settings'
+import { Quote } from './pages/Quote'
 import { Share } from './pages/Share'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="mes-configs" element={<Saved />} />
           <Route path="parametres" element={<Settings />} />
           <Route path="partage/:code" element={<Share />} />
+          <Route path="devis/:code" element={<Quote />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

@@ -20,7 +20,12 @@ Production : https://enginepc.heiphaistos.org
 - **Aperçu temps réel** : score par usage, FPS estimés 1080p/1440p/4K (goulot CPU inclus), taille de LLM
   exécutable en VRAM, tokens/s indicatifs, consommation et alimentation conseillée.
 - **Appareils complets** : portables, tablettes, smartphones et NAS clé en main classés par usage.
-- **Exports** : JSON (format d'échange), CSV Excel, Markdown, impression/PDF, lien de partage.
+- **Prix HT / TTC** : affichage TTC, HT ou les deux (bouton dans l'en-tête), TVA par pays (15 pays),
+  taux réduit personnalisable, franchise en base (art. 293 B du CGI), 12 devises (taux BCE).
+- **Exports** : JSON (format d'échange), CSV Excel et Markdown avec colonnes HT / TVA / TTC, impression/PDF,
+  lien de partage.
+- **Devis** : devis imprimable numéroté (coordonnées vendeur, client, lignes modifiables, prestations,
+  remise, HT / TVA / TTC, validité, conditions de paiement, bon pour accord).
 - **Mes configs** : sauvegarde locale, import JSON, comparaison côte à côte (jusqu'à 4).
 - **Comparateur de prix** : prix live, liens produits et envoi de configurations — voir
   [docs/INTEGRATION.md](docs/INTEGRATION.md).

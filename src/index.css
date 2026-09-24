@@ -171,4 +171,20 @@ input[type='range'] {
     border-color: #ccc !important;
     break-inside: avoid;
   }
+  input::placeholder,
+  textarea::placeholder {
+    color: transparent !important;
+  }
+  input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input::-webkit-inner-spin-button,
+  input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  tr {
+    break-inside: avoid;
+  }
 }

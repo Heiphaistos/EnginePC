@@ -1,4 +1,5 @@
 import { Columns3, Pencil, Trash2, Upload } from 'lucide-react'
+import { Price } from '../components/Price'
 import { useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ExportMenu } from '../components/ExportMenu'
@@ -11,7 +12,7 @@ import { checkBuild, hasBlockingIssues } from '../engine/compatibility'
 import { estimatePowerW, lineItems, resolveBuild, totalPrice, totalRamGB, totalStorageGB, totalVramGB } from '../engine/resolve'
 import { estimateAi, estimateGamingFps, scoreDevice, scoreResolved } from '../engine/scoring'
 import type { BuildExport } from '../lib/export'
-import { cn, formatCapacity, formatPrice } from '../lib/format'
+import { cn, formatCapacity, formatHT, formatTTC, formatVatAmount } from '../lib/format'
 import { uid } from '../lib/id'
 import { useCatalog } from '../store/catalog'
 import { useStore } from '../store/useStore'
@@ -90,7 +91,7 @@ export function Saved() {
                       <Icon name={DEVICE_TYPE_BY_ID[b.deviceType].icon} className="h-3.5 w-3.5" /> {DEVICE_TYPE_BY_ID[b.deviceType].label} · {PROFILE_BY_ID[b.profile].label}
                     </div>
                     <h3 className="mt-1 font-semibold">{b.name}</h3>
-                    <div className="mt-1 text-2xl font-bold tabular-nums">{formatPrice(s.price)}</div>
+                    <div className="mt-1 text-2xl font-bold"><Price value={s.price} /></div>
                     {!s.ok && <div className="text-xs text-red-400">Incompatibilités à corriger</div>}
                   </div>
                   <ScoreRing value={s.score} size={70} />
@@ -137,7 +138,9 @@ function Comparison({ builds }: { builds: Build[] }) {
     return { b, r, d, s: summarize(b, catalog), fps, ai }
   })
   const rows: [string, (x: (typeof data)[number]) => string][] = [
-    ['Prix', (x) => formatPrice(x.s.price)],
+    ['Prix HT', (x) => formatHT(x.s.price)],
+    ['TVA', (x) => formatVatAmount(x.s.price)],
+    ['Prix TTC', (x) => formatTTC(x.s.price)],
     ['Score (usage)', (x) => `${Math.round(x.s.score)}/100`],
     ['Type', (x) => DEVICE_TYPE_BY_ID[x.b.deviceType].label],
     ...CATEGORY_ORDER.map(

@@ -1,10 +1,11 @@
 import { AlertCircle, AlertTriangle, BrainCircuit, CheckCircle2, Gauge, Info, Save, Zap } from 'lucide-react'
+import { Price, PriceBreakdown } from './Price'
 import { useMemo } from 'react'
 import { PROFILE_BY_ID, profilesFor } from '../data/profiles'
 import { checkBuild, hasBlockingIssues } from '../engine/compatibility'
 import { estimatePowerW, lineItems, recommendedPsuW, resolveBuild, totalPrice, totalRamGB, totalStorageGB, totalVramGB } from '../engine/resolve'
 import { estimateAi, estimateGamingFps, scoreResolved } from '../engine/scoring'
-import { cn, formatCapacity, formatPrice } from '../lib/format'
+import { cn, formatCapacity } from '../lib/format'
 import { useCatalog } from '../store/catalog'
 import { useLivePrices } from '../store/usePrices'
 import type { Build } from '../types'
@@ -34,7 +35,7 @@ export function BuildSummary({ build, onSave, saved }: { build: Build; onSave?: 
           <ScoreRing value={score} />
           <div className="min-w-0 flex-1">
             <div className="label">Score {PROFILE_BY_ID[build.profile].label}</div>
-            <div className="mt-1 text-3xl font-bold tabular-nums">{formatPrice(total)}</div>
+            <div className="mt-1 text-3xl font-bold"><Price value={total} subClassName="text-sm" /></div>
             <div className="muted text-xs">
               {items.length} composant(s) · {prices.loading ? 'mise à jour des prix…' : prices.results.size ? `${prices.results.size} prix live` : 'prix indicatifs'}
             </div>
@@ -50,6 +51,7 @@ export function BuildSummary({ build, onSave, saved }: { build: Build; onSave?: 
           {blocking ? <AlertCircle className="h-4 w-4" /> : missing ? <Info className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
           {blocking ? 'Incompatibilités détectées' : missing ? `${missing.categories.length} composant(s) à choisir` : 'Configuration compatible'}
         </div>
+        {total > 0 && <PriceBreakdown value={total} className="card-soft mt-4 p-3" />}
         <div className="no-print mt-4 grid grid-cols-2 gap-2">
           {onSave && (
             <button className="btn btn-primary" onClick={onSave}>

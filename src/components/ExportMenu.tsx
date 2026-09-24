@@ -1,4 +1,6 @@
-import { Check, ChevronDown, Download, FileJson, FileSpreadsheet, FileText, Link2, Printer, ShoppingCart } from 'lucide-react'
+import { Check, ChevronDown, Download, FileJson, FileSpreadsheet, FileText, Link2, Printer, Receipt, ShoppingCart } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { vatRate } from '../lib/format'
 import { useEffect, useRef, useState } from 'react'
 import { download, encodeShare, exportCsv, exportJson, exportMarkdown, slug } from '../lib/export'
 import { useCatalog } from '../store/catalog'
@@ -12,6 +14,7 @@ export function shareUrl(build: Build): string {
 export function ExportMenu({ build, price, compact }: { build: Build; price?: (c: PCComponent) => number; compact?: boolean }) {
   const catalog = useCatalog()
   const provider = usePriceProvider()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -24,10 +27,11 @@ export function ExportMenu({ build, price, compact }: { build: Build; price?: (c
 
   const name = slug(build.name)
   const actions = [
-    { icon: FileJson, label: 'JSON (format EnginePC)', run: () => download(`${name}.json`, exportJson(build, catalog, price), 'application/json') },
-    { icon: FileSpreadsheet, label: 'CSV (Excel)', run: () => download(`${name}.csv`, exportCsv(build, catalog, price), 'text/csv;charset=utf-8') },
-    { icon: FileText, label: 'Markdown', run: () => download(`${name}.md`, exportMarkdown(build, catalog, price), 'text/markdown') },
-    { icon: Printer, label: 'Imprimer / PDF', run: () => window.print() },
+    { icon: FileJson, label: 'JSON (format EnginePC)', run: () => download(`${name}.json`, exportJson(build, catalog, { price, vatRate: vatRate() }), 'application/json') },
+    { icon: FileSpreadsheet, label: 'CSV (Excel)', run: () => download(`${name}.csv`, exportCsv(build, catalog, { price, vatRate: vatRate() }), 'text/csv;charset=utf-8') },
+    { icon: FileText, label: 'Markdown', run: () => download(`${name}.md`, exportMarkdown(build, catalog, { price, vatRate: vatRate() }), 'text/markdown') },
+    { icon: Receipt, label: 'Devis HT / TTC (PDF)', run: () => navigate(`/devis/${encodeShare(build)}`) },
+    { icon: Printer, label: 'Imprimer la page', run: () => window.print() },
     {
       icon: copied ? Check : Link2,
       label: copied ? 'Lien copié !' : 'Copier le lien de partage',

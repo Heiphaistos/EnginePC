@@ -1,4 +1,5 @@
 import { Loader2, Save, Sparkles, Wrench } from 'lucide-react'
+import { Price } from '../components/Price'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BuildParts } from '../components/BuildParts'
@@ -9,7 +10,8 @@ import { ScoreRing } from '../components/Score'
 import { DEVICE_TYPE_BY_ID, DEVICE_TYPES, PROFILE_BY_ID, profilesFor } from '../data/profiles'
 import { recommendDevices, type AssembledType, type GeneratorPreferences } from '../engine/generator'
 import { estimateAi, estimateGamingFps } from '../engine/scoring'
-import { cn, formatPrice } from '../lib/format'
+import { cn, priceMode, vatRate } from '../lib/format'
+import { CATALOG_VAT } from '../lib/tax'
 import { useCatalog } from '../store/catalog'
 import { useGeneratedVariants } from '../store/useGenerator'
 import { newBuild, useStore } from '../store/useStore'
@@ -35,6 +37,9 @@ export function Generator() {
   const profileParam = params.get('profile') as UsageProfile | null
   const profile = profileParam && allowedProfiles.some((p) => p.id === profileParam) ? profileParam : info.defaultProfile
   const budget = Number(params.get('budget')) || info.defaultBudget
+  // Le budget saisi est HT ou TTC (pays choisi) selon l'affichage ; le moteur travaille en TTC France.
+  const mode = priceMode()
+  const engineBudget = Math.round(mode === 'ht' ? budget * (1 + CATALOG_VAT / 100) : (budget / (1 + vatRate() / 100)) * (1 + CATALOG_VAT / 100))
   const [prefs, setPrefs] = useState<GeneratorPreferences>({})
   const [deviceBrand, setDeviceBrand] = useState('')
   const [nasMode, setNasMode] = useState<'diy' | 'turnkey'>('diy')
@@ -49,9 +54,9 @@ export function Generator() {
   }
 
   const assembled = info.assembled && !(type === 'nas' && nasMode === 'turnkey')
-  const input = { type, profile, budget, prefs, deviceBrand, assembled }
+  const input = { type, profile, budget: engineBudget, prefs, deviceBrand, assembled }
   const { variants, loading: stale } = useGeneratedVariants(
-    assembled ? { deviceType: type as AssembledType, profile, budget, prefs } : null,
+    assembled ? { deviceType: type as AssembledType, profile, budget: engineBudget, prefs } : null,
   )
   const devices = useMemo(
     () =>
@@ -59,7 +64,7 @@ export function Generator() {
         ? []
         : recommendDevices(catalog, input.type as 'laptop' | 'tablet' | 'phone' | 'nas', input.profile, input.budget, { brand: input.deviceBrand || undefined }).slice(0, 12),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [catalog, type, profile, budget, deviceBrand, assembled],
+    [catalog, type, profile, engineBudget, deviceBrand, assembled],
   )
   const deviceBrands = useMemo(() => [...new Set(catalog.devices.filter((d) => d.deviceType === type).map((d) => d.brand))].sort(), [catalog, type])
 
@@ -129,7 +134,7 @@ export function Generator() {
           <p className="muted mt-2 text-xs">{PROFILE_BY_ID[profile].description}</p>
 
           <div className="mt-5 flex items-end justify-between">
-            <div className="label">Budget</div>
+            <div className="label">Budget {mode === 'ht' ? 'HT' : 'TTC'} (€)</div>
             <input
               type="number"
               className="input w-32 text-right font-semibold"
@@ -149,8 +154,8 @@ export function Generator() {
             onChange={(e) => update({ budget: fromSlider(Number(e.target.value), info.budgetRange) })}
           />
           <div className="muted flex justify-between text-xs">
-            <span>{formatPrice(info.budgetRange[0])}</span>
-            <span>{formatPrice(info.budgetRange[1])}</span>
+            <span>{info.budgetRange[0].toLocaleString('fr-FR')} €</span>
+            <span>{info.budgetRange[1].toLocaleString('fr-FR')} €</span>
           </div>
 
           {assembled ? (
@@ -220,7 +225,7 @@ export function Generator() {
                         {v.key === 'best' && <span className="rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-2 py-0.5 text-xs font-semibold text-white">Meilleur choix</span>}
                       </div>
                       <p className="muted text-xs">{v.description}</p>
-                      <div className="mt-2 text-3xl font-bold tabular-nums">{formatPrice(v.build.total)}</div>
+                      <div className="mt-2 text-3xl font-bold"><Price value={v.build.total} subClassName="text-sm" /></div>
                     </div>
                     <ScoreRing value={v.build.score} size={84} />
                   </header>

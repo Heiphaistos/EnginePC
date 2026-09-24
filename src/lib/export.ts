@@ -5,9 +5,12 @@ import { checkBuild } from '../engine/compatibility'
 import { estimatePowerW, lineItems, resolveBuild, totalPrice } from '../engine/resolve'
 import { scoreDevice, scoreResolved } from '../engine/scoring'
 import type { Build, PCComponent } from '../types'
-import { formatPrice } from './format'
+import { formatMoney } from './format'
+import { breakdown, CATALOG_VAT, toHT, toTTC } from './tax'
 
-export const EXPORT_SCHEMA_VERSION = 1
+export const EXPORT_SCHEMA_VERSION = 2
+
+const cents = (v: number) => Math.round(v * 100) / 100
 
 /** Format d'échange JSON (consommé aussi par le comparateur de prix). */
 export interface BuildExport {
@@ -18,7 +21,12 @@ export interface BuildExport {
   summary: {
     deviceType: string
     profile: string
+    /** Total TTC (TVA du pays choisi). */
     totalPrice: number
+    totalHT: number
+    totalVAT: number
+    /** Taux de TVA appliqué (%). */
+    vatRate: number
     currency: 'EUR'
     score: number
     estimatedPowerW?: number
@@ -29,19 +37,34 @@ export interface BuildExport {
     brand: string
     model: string
     qty: number
+    /** Prix unitaire TTC. */
     unitPrice: number
+    unitPriceHT: number
     ean?: string
     mpn?: string
   }[]
 }
 
-export function buildToExport(build: Build, catalog: Catalog, price: (c: PCComponent) => number = (c) => c.price): BuildExport {
+export interface ExportOptions {
+  price?: (c: PCComponent) => number
+  /** Taux de TVA (%) appliqué aux prix exportés ; 20 % par défaut. */
+  vatRate?: number
+}
+
+export function buildToExport(build: Build, catalog: Catalog, opts: ExportOptions = {}): BuildExport {
+  const price = opts.price ?? ((c: PCComponent) => c.price)
+  const vatRate = opts.vatRate ?? CATALOG_VAT
   const base = {
     schema: 'enginepc.build' as const,
     version: EXPORT_SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
     build,
   }
+  const totals = (catalogTtc: number) => {
+    const b = breakdown(catalogTtc, vatRate)
+    return { totalPrice: cents(b.ttc), totalHT: cents(b.ht), totalVAT: cents(b.vat), vatRate, currency: 'EUR' as const }
+  }
+  const line = (catalogTtc: number) => ({ unitPrice: cents(toTTC(catalogTtc, vatRate)), unitPriceHT: cents(toHT(catalogTtc)) })
   if (build.deviceId) {
     const d = catalog.deviceById.get(build.deviceId)
     return {
@@ -49,11 +72,10 @@ export function buildToExport(build: Build, catalog: Catalog, price: (c: PCCompo
       summary: {
         deviceType: build.deviceType,
         profile: build.profile,
-        totalPrice: d?.price ?? 0,
-        currency: 'EUR',
+        ...totals(d?.price ?? 0),
         score: d ? Math.round(scoreDevice(d, build.profile)) : 0,
       },
-      items: d ? [{ id: d.id, category: d.deviceType, brand: d.brand, model: d.model, qty: 1, unitPrice: d.price, ean: d.ean }] : [],
+      items: d ? [{ id: d.id, category: d.deviceType, brand: d.brand, model: d.model, qty: 1, ...line(d.price), ean: d.ean }] : [],
     }
   }
   const r = resolveBuild(build.slots, catalog)
@@ -62,8 +84,7 @@ export function buildToExport(build: Build, catalog: Catalog, price: (c: PCCompo
     summary: {
       deviceType: build.deviceType,
       profile: build.profile,
-      totalPrice: Math.round(totalPrice(r, price)),
-      currency: 'EUR',
+      ...totals(totalPrice(r, price)),
       score: Math.round(scoreResolved(r, build.profile)),
       estimatedPowerW: estimatePowerW(r),
     },
@@ -73,58 +94,69 @@ export function buildToExport(build: Build, catalog: Catalog, price: (c: PCCompo
       brand: item.brand,
       model: item.model,
       qty,
-      unitPrice: price(item),
+      ...line(price(item)),
       ean: item.ean,
       mpn: item.mpn,
     })),
   }
 }
 
-export function exportJson(build: Build, catalog: Catalog, price?: (c: PCComponent) => number): string {
-  return JSON.stringify(buildToExport(build, catalog, price), null, 2)
+export function exportJson(build: Build, catalog: Catalog, opts?: ExportOptions): string {
+  return JSON.stringify(buildToExport(build, catalog, opts), null, 2)
 }
 
 const csvCell = (v: string | number | undefined) => {
-  const s = String(v ?? '')
+  const s = typeof v === 'number' ? v.toFixed(2).replace('.', ',') : String(v ?? '')
   return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 
-export function exportCsv(build: Build, catalog: Catalog, price?: (c: PCComponent) => number): string {
-  const e = buildToExport(build, catalog, price)
-  const rows = [
-    ['Catégorie', 'Marque', 'Modèle', 'Quantité', 'Prix unitaire (EUR)', 'Total (EUR)', 'EAN', 'Référence'],
+const categoryLabel = (c: string) =>
+  CATEGORY_LABELS[c as keyof typeof CATEGORY_LABELS] ?? DEVICE_TYPE_BY_ID[c as keyof typeof DEVICE_TYPE_BY_ID]?.label ?? c
+
+export function exportCsv(build: Build, catalog: Catalog, opts?: ExportOptions): string {
+  const e = buildToExport(build, catalog, opts)
+  const rows: (string | number | undefined)[][] = [
+    ['Catégorie', 'Marque', 'Modèle', 'Quantité', 'PU HT (EUR)', 'Total HT (EUR)', `TVA ${e.summary.vatRate} %`, 'PU TTC (EUR)', 'Total TTC (EUR)', 'EAN', 'Référence'],
     ...e.items.map((i) => [
-      CATEGORY_LABELS[i.category as keyof typeof CATEGORY_LABELS] ?? DEVICE_TYPE_BY_ID[i.category as keyof typeof DEVICE_TYPE_BY_ID]?.label ?? i.category,
+      categoryLabel(i.category),
       i.brand,
       i.model,
-      i.qty,
+      String(i.qty),
+      i.unitPriceHT,
+      i.unitPriceHT * i.qty,
+      (i.unitPrice - i.unitPriceHT) * i.qty,
       i.unitPrice,
       i.unitPrice * i.qty,
       i.ean,
       i.mpn,
     ]),
-    ['', '', 'TOTAL', '', '', e.summary.totalPrice, '', ''],
+    [],
+    ['', '', 'TOTAL HT', '', '', e.summary.totalHT],
+    ['', '', `TVA ${e.summary.vatRate} %`, '', '', e.summary.totalVAT],
+    ['', '', 'TOTAL TTC', '', '', e.summary.totalPrice],
   ]
-  // Point-virgule + BOM : ouverture directe dans Excel FR.
-  return '﻿' + rows.map((r) => r.map(csvCell).join(';')).join('\n')
+  // Point-virgule, virgule décimale + BOM : ouverture directe dans Excel FR.
+  return '\ufeff' + rows.map((r) => r.map(csvCell).join(';')).join('\n')
 }
 
-export function exportMarkdown(build: Build, catalog: Catalog, price?: (c: PCComponent) => number): string {
-  const e = buildToExport(build, catalog, price)
+export function exportMarkdown(build: Build, catalog: Catalog, opts?: ExportOptions): string {
+  const e = buildToExport(build, catalog, opts)
+  const eur = (v: number) => formatMoney(v)
   const lines = [
     `# ${build.name}`,
     '',
     `- **Type** : ${DEVICE_TYPE_BY_ID[build.deviceType].label}`,
     `- **Usage** : ${PROFILE_BY_ID[build.profile].label}`,
     `- **Score** : ${e.summary.score}/100`,
-    `- **Prix total** : ${formatPrice(e.summary.totalPrice)}`,
+    `- **Total HT** : ${eur(e.summary.totalHT)}`,
+    `- **TVA ${e.summary.vatRate} %** : ${eur(e.summary.totalVAT)}`,
+    `- **Total TTC** : ${eur(e.summary.totalPrice)}`,
     ...(e.summary.estimatedPowerW ? [`- **Consommation estimée** : ~${e.summary.estimatedPowerW} W`] : []),
     '',
-    '| Composant | Produit | Qté | Prix |',
-    '|---|---|---:|---:|',
+    '| Composant | Produit | Qté | PU HT | Total HT | Total TTC |',
+    '|---|---|---:|---:|---:|---:|',
     ...e.items.map(
-      (i) =>
-        `| ${CATEGORY_LABELS[i.category as keyof typeof CATEGORY_LABELS] ?? i.category} | ${displayName(i)} | ${i.qty} | ${formatPrice(i.unitPrice * i.qty)} |`,
+      (i) => `| ${categoryLabel(i.category)} | ${displayName(i)} | ${i.qty} | ${eur(i.unitPriceHT)} | ${eur(i.unitPriceHT * i.qty)} | ${eur(i.unitPrice * i.qty)} |`,
     ),
     '',
   ]

@@ -1,4 +1,5 @@
 import { Minus, Plus, RotateCcw, Search, Sparkles, Trash2, Wand2 } from 'lucide-react'
+import { Price } from '../components/Price'
 import { useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { BuildSummary } from '../components/BuildSummary'
@@ -341,7 +342,7 @@ function DeviceBuilder({ build, update, onSave, saved }: { build: Build; update:
               <div>
                 <div className="label">{selected.brand}</div>
                 <div className="font-semibold">{selected.model}</div>
-                <div className="mt-1 text-2xl font-bold">{formatPrice(selected.price)}</div>
+                <div className="mt-1 text-2xl font-bold"><Price value={selected.price} /></div>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-1">

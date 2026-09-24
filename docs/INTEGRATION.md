@@ -88,9 +88,13 @@ Le comparateur peut donc renvoyer vers EnginePC avec un bouton « Modifier cette
 
 ## 4. Export JSON complet
 
-Le bouton « Exporter → JSON » produit un document `schema: "enginepc.build"` contenant la config, le
-récapitulatif (prix total, score, consommation) et la liste des articles avec quantités, EAN et MPN :
-le comparateur peut l'importer directement pour constituer un panier multi-marchands.
+Le bouton « Exporter → JSON » produit un document `schema: "enginepc.build"` (version 2) contenant la config, le
+récapitulatif et la liste des articles avec quantités, EAN et MPN : le comparateur peut l'importer directement
+pour constituer un panier multi-marchands.
+
+Montants : `summary.totalHT`, `summary.totalVAT`, `summary.totalPrice` (TTC) et `summary.vatRate` (%) ;
+par article `unitPriceHT` et `unitPrice` (TTC). Le taux est celui choisi dans Paramètres (20 % par défaut).
+Les prix renvoyés par `/api/v1/prices/lookup` sont attendus **TTC France**.
 
 ## 5. CORS
 
