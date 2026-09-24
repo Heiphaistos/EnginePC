@@ -74,11 +74,37 @@ const MULTI_WORD_BRANDS = [
   'SK hynix', 'Creative Labs', 'In Win', 'PC Power & Cooling', 'Geometric Future', 'Arctic Cooling', 'Team Group',
 ]
 
+/** Graphie officielle des marques (le dataset mélange « Asus », « ASUS »…). */
+const BRAND_ALIASES: Record<string, string> = {
+  asus: 'ASUS',
+  msi: 'MSI',
+  teamgroup: 'TeamGroup',
+  seasonic: 'Seasonic',
+  arctic: 'Arctic',
+  kioxia: 'Kioxia',
+  hyte: 'HYTE',
+  silverstone: 'SilverStone',
+  nzxt: 'NZXT',
+  evga: 'EVGA',
+  adata: 'ADATA',
+  xfx: 'XFX',
+  pny: 'PNY',
+  hp: 'HP',
+  lg: 'LG',
+  aoc: 'AOC',
+  benq: 'BenQ',
+  'id-cooling': 'ID-COOLING',
+  sharkoon: 'Sharkoon',
+  raijintek: 'Raijintek',
+  gamdias: 'GAMDIAS',
+  endorfy: 'Endorfy',
+}
+
 function splitBrand(name: string): { brand: string; model: string } {
   const clean = name.replace(/\s+/g, ' ').trim()
   for (const b of MULTI_WORD_BRANDS) if (clean.toLowerCase().startsWith(b.toLowerCase() + ' ')) return { brand: b, model: clean.slice(b.length + 1) }
   const [first, ...rest] = clean.split(' ')
-  const brand = first === 'TEAMGROUP' ? 'TeamGroup' : first === 'SeaSonic' ? 'Seasonic' : first
+  const brand = BRAND_ALIASES[first.toLowerCase()] ?? first
   // "Acer Acer Nitro…" → "Nitro…"
   const model = rest[0]?.toLowerCase() === first.toLowerCase() ? rest.slice(1).join(' ') : rest.join(' ')
   return { brand, model: model || clean }

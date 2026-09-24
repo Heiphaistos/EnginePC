@@ -1,4 +1,4 @@
-import { Download, Search } from 'lucide-react'
+import { Download, LayoutGrid, List, Search } from 'lucide-react'
 import { Price } from '../components/Price'
 import { useMemo, useState } from 'react'
 import { CategoryIcon, Icon } from '../components/Icon'
@@ -26,6 +26,21 @@ export function Catalog() {
   const [origin, setOrigin] = useState<'all' | 'verified' | 'open'>('all')
   const [kind, setKind] = useState('')
   const [limit, setLimit] = useState(200)
+  const [view, setView] = useState<'grid' | 'table'>(() => {
+    try {
+      return (localStorage.getItem('enginepc-catalog-view') as 'grid' | 'table') || 'grid'
+    } catch {
+      return 'grid'
+    }
+  })
+  const changeView = (v: 'grid' | 'table') => {
+    setView(v)
+    try {
+      localStorage.setItem('enginepc-catalog-view', v)
+    } catch {
+      /* stockage indisponible */
+    }
+  }
   const [details, setDetails] = useState<PCComponent | Device | null>(null)
   const extraMeta = useStore((s) => s.extraMeta)
   const compareParts = useStore((s) => s.compareParts)
@@ -122,6 +137,64 @@ export function Catalog() {
           </Link>
         </div>
       )}
+      <div className="mb-3 flex items-center justify-between">
+        <span className="muted text-sm">{rows.length.toLocaleString('fr-FR')} résultat(s)</span>
+        <div className="card-soft flex p-0.5" role="group" aria-label="Affichage">
+          <button className={cn('rounded-md px-2 py-1', view === 'grid' ? 'bg-brand-500 text-white' : 'muted')} onClick={() => changeView('grid')} aria-label="Vue grille">
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+          <button className={cn('rounded-md px-2 py-1', view === 'table' ? 'bg-brand-500 text-white' : 'muted')} onClick={() => changeView('table')} aria-label="Vue tableau">
+            <List className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      {view === 'grid' && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {rows.slice(0, limit).map((r) => (
+            <div key={r.id} className="card card-glow flex cursor-pointer flex-col overflow-hidden" onClick={() => setDetails(r.item)}>
+              <div className="relative grid h-28 place-items-center bg-gradient-to-br from-brand-500/10 via-transparent to-accent-500/15">
+                {isDevice ? (
+                  <Icon name={DEVICE_TYPE_BY_ID[tab as Device['deviceType']].icon} className="h-12 w-12 text-brand-300/80" />
+                ) : (
+                  <CategoryIcon category={tab as ComponentCategory} className="h-12 w-12 text-brand-300/80" />
+                )}
+                <span className="chip absolute left-3 top-3">{r.brand}</span>
+                {r.open && <span className="chip absolute right-3 top-3 border-accent-500/40 text-accent-400">Base ouverte</span>}
+                {!isDevice && (
+                  <label className="absolute bottom-2 right-3 flex items-center gap-1 text-xs" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={compareParts.includes(r.id)} onChange={() => toggleComparePart(r.id)} /> Comparer
+                  </label>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col p-4">
+                <div className="font-semibold leading-snug">{r.name}</div>
+                <div className="muted mt-0.5 text-xs">
+                  {TIER_LABELS[r.tier]} · {r.year}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {r.specs.slice(0, 4).map((sp) => (
+                    <span key={sp} className="chip">
+                      {sp}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-auto pt-3 text-lg font-bold">
+                  <Price value={r.price} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {view === 'grid' && rows.length === 0 && <p className="muted card p-8 text-center">Aucun résultat.</p>}
+      {view === 'grid' && rows.length > limit && (
+        <div className="p-4 text-center">
+          <button className="btn btn-ghost btn-sm" onClick={() => setLimit(limit + 200)}>
+            Afficher plus ({rows.length - limit} restants)
+          </button>
+        </div>
+      )}
+      {view === 'table' && (
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -173,6 +246,7 @@ export function Catalog() {
           </div>
         )}
       </div>
+      )}
       {details && <ProductDetails item={details} onClose={() => setDetails(null)} />}
     </div>
   )

@@ -1,4 +1,5 @@
 import type { ComponentCategory, Device, PCComponent } from '../../types'
+import { accessories } from './accessories'
 import { cases } from './cases'
 import { coolers } from './coolers'
 import { cpus } from './cpus'
@@ -25,6 +26,7 @@ export const baseComponents: PCComponent[] = [
   ...coolers,
   ...nics,
   ...hbas,
+  ...accessories,
 ]
 
 export const baseDevices: Device[] = [...laptops, ...tablets, ...phones, ...nasDevices]
