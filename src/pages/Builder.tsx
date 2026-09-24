@@ -108,7 +108,8 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
   }
   const remove = (category: ComponentCategory, index?: number) => {
     const slots = { ...build.slots }
-    if (category === 'gpu' || category === 'storage') slots[category] = (slots[category] ?? []).filter((_, i) => i !== index)
+    if (category === 'accessory') slots.accessories = (slots.accessories ?? []).filter((_, i) => i !== index)
+    else if (category === 'gpu' || category === 'storage') slots[category] = (slots[category] ?? []).filter((_, i) => i !== index)
     else delete slots[category]
     setSlots(slots)
   }
@@ -195,6 +196,36 @@ function AssembledBuilder({ build, update, onSave, saved }: { build: Build; upda
             </div>
           )
         })}
+        <div className="card p-4">
+          <div className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent-500/10 text-accent-400">
+              <CategoryIcon category="accessory" className="h-4.5 w-4.5" />
+            </span>
+            <div className="flex-1">
+              <div className="font-semibold">Périphériques & accessoires</div>
+              <div className="muted text-xs">Écran, clavier, souris, casque, onduleur, ventilateurs… ajoutés au prix total</div>
+            </div>
+            <button className="btn btn-ghost btn-sm no-print" onClick={() => setPicker({ category: 'accessory', mode: 'add' })}>
+              <Plus className="h-3.5 w-3.5" /> Ajouter
+            </button>
+          </div>
+          {(build.slots.accessories ?? []).map((id, index) => {
+            const a = lookup<PCComponent>(catalog, id)
+            if (!a) return null
+            return (
+              <div key={`${id}-${index}`} className="card-soft mt-3 flex items-center gap-3 p-3">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{displayName(a)}</div>
+                  <div className="muted truncate text-xs">{componentSpecs(a).join(' · ')}</div>
+                </div>
+                <span className="font-bold tabular-nums">{formatPrice(a.price)}</span>
+                <button className="btn btn-ghost btn-sm no-print px-2" onClick={() => remove('accessory', index)} aria-label="Retirer">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )
+          })}
+        </div>
         {build.deviceType === 'nas' && (
           <p className="muted text-sm">
             Vous préférez un NAS clé en main ?{' '}

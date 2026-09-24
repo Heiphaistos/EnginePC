@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { DEVICE_TYPE_BY_ID, PROFILE_BY_ID } from '../data/profiles'
 import { DEFAULT_PRICE_SETTINGS, type PriceSettings } from '../services/pricing'
 import type { Build, BuildSlots, Device, DeviceType, PCComponent, UsageProfile } from '../types'
-import { uid } from '../lib/format'
+import { uid } from '../lib/id'
 
 export function newBuild(deviceType: DeviceType, profile?: UsageProfile): Build {
   const p = profile ?? DEVICE_TYPE_BY_ID[deviceType].defaultProfile
@@ -29,6 +29,13 @@ interface State {
   customComponents: PCComponent[]
   customDevices: Device[]
   theme: 'dark' | 'light'
+  /** Inclure la base étendue (données ouvertes) dans le configurateur et le catalogue. */
+  useExtended: boolean
+  /** Base étendue chargée depuis /data/extra-catalog.json (non persistée). */
+  extra: PCComponent[]
+  extraMeta: { generatedAt?: string; source?: string; status: 'idle' | 'loading' | 'ready' | 'error' }
+  /** Taux de change depuis l'euro (non persistés). */
+  rates: { base: 'EUR'; rates: Record<string, number>; source: string; date?: string }
 
   getDraft: (t: DeviceType) => Build
   setDraft: (b: Build) => void
@@ -42,6 +49,9 @@ interface State {
   importCatalog: (components: PCComponent[], devices: Device[]) => void
   clearCustomCatalog: () => void
   toggleTheme: () => void
+  setUseExtended: (v: boolean) => void
+  setExtra: (extra: PCComponent[], meta: State['extraMeta']) => void
+  setRates: (r: State['rates']) => void
 }
 
 export const useStore = create<State>()(
@@ -54,6 +64,10 @@ export const useStore = create<State>()(
       customComponents: [],
       customDevices: [],
       theme: 'dark',
+      useExtended: true,
+      extra: [],
+      extraMeta: { status: 'idle' },
+      rates: { base: 'EUR', rates: { EUR: 1 }, source: 'aucune' },
 
       getDraft: (t) => get().drafts[t] ?? newBuild(t),
       setDraft: (b) => set((s) => ({ drafts: { ...s.drafts, [b.deviceType]: { ...b, updatedAt: Date.now() } } })),
@@ -83,7 +97,14 @@ export const useStore = create<State>()(
         }),
       clearCustomCatalog: () => set({ customComponents: [], customDevices: [] }),
       toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      setUseExtended: (v) => set({ useExtended: v }),
+      setExtra: (extra, extraMeta) => set({ extra, extraMeta }),
+      setRates: (rates) => set({ rates }),
     }),
-    { name: 'enginepc', version: 1 },
+    {
+      name: 'enginepc',
+      version: 1,
+      partialize: ({ extra: _e, extraMeta: _m, rates: _r, ...rest }) => rest,
+    },
   ),
 )

@@ -1,14 +1,15 @@
-import { AlertTriangle, Check, Search, X } from 'lucide-react'
+import { AlertTriangle, Check, Info, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CATEGORY_LABELS } from '../data/catalog'
 import { displayName } from '../engine/catalog'
 import { candidateErrors } from '../engine/compatibility'
 import { cn, formatPrice } from '../lib/format'
-import { componentSpecs, TIER_LABELS } from '../lib/specs'
+import { ACCESSORY_LABELS, componentSpecs, TIER_LABELS } from '../lib/specs'
 import { useCatalog } from '../store/catalog'
 import { useLivePrices } from '../store/usePrices'
-import type { BuildSlots, ComponentCategory, DeviceType, PCComponent, UsageProfile } from '../types'
+import type { AccessoryKind, BuildSlots, ComponentCategory, DeviceType, PCComponent, UsageProfile } from '../types'
 import { CategoryIcon } from './Icon'
+import { ProductDetails } from './ProductDetails'
 
 type SortKey = 'perf' | 'price-asc' | 'price-desc' | 'recent'
 
@@ -34,6 +35,8 @@ function perfKey(c: PCComponent, profile: UsageProfile): number {
       return c.price
     case 'case':
       return c.maxGpuLengthMm + c.driveBays35 * 10
+    case 'accessory':
+      return (c.refreshHz ?? 0) * 10 + (c.resolutionY ?? 0) + c.price / 1000
   }
 }
 
@@ -56,6 +59,10 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
   const [onlyCompatible, setOnlyCompatible] = useState(true)
   const [segment, setSegment] = useState<'all' | 'consumer' | 'pro'>(deviceType === 'server' ? 'all' : 'all')
   const [maxPrice, setMaxPrice] = useState(0)
+  const [origin, setOrigin] = useState<'all' | 'verified' | 'open'>('all')
+  const [kind, setKind] = useState<AccessoryKind | ''>('')
+  const [limit, setLimit] = useState(150)
+  const [details, setDetails] = useState<PCComponent | null>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -74,6 +81,8 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
         return segment === 'pro' ? pro : !pro
       })
       .filter((c) => !maxPrice || c.price <= maxPrice)
+      .filter((c) => origin === 'all' || (origin === 'open' ? !!c.source : !c.source))
+      .filter((c) => !kind || (c.category === 'accessory' && c.kind === kind))
       .filter((c) => {
         if (!words.length) return true
         const hay = `${c.brand} ${c.model} ${componentSpecs(c).join(' ')}`.toLowerCase()
@@ -93,9 +102,13 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
             return perfKey(b.c, profile) - perfKey(a.c, profile) || a.c.price - b.c.price
         }
       })
-  }, [all, brand, segment, maxPrice, q, slots, catalog, deviceType, onlyCompatible, sort, profile])
+  }, [all, brand, segment, maxPrice, origin, kind, q, slots, catalog, deviceType, onlyCompatible, sort, profile])
 
-  const visible = rows.slice(0, 150)
+  const visible = rows.slice(0, limit)
+  const kinds = useMemo(
+    () => [...new Set(all.map((c) => (c.category === 'accessory' ? c.kind : null)).filter((k): k is AccessoryKind => !!k))],
+    [all],
+  )
   const prices = useLivePrices(visible.map((r) => r.c))
   const maxAll = Math.max(0, ...all.map((c) => c.price))
 
@@ -117,7 +130,7 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
           </button>
         </div>
 
-        <div className="grid gap-2 border-b border-[var(--border)] p-4 md:grid-cols-[1fr_auto_auto_auto]">
+        <div className="grid gap-2 border-b border-[var(--border)] p-4 md:grid-cols-[1fr_auto_auto] lg:grid-cols-[1fr_auto_auto_auto_auto]">
           <label className="relative">
             <Search className="muted pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <input autoFocus className="input pl-9" placeholder="Rechercher un modèle, une spec (ex: 16 Go, AM5, 4.0)…" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -139,7 +152,22 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
             <option value="consumer">Grand public</option>
             <option value="pro">Pro / serveur</option>
           </select>
-          <div className="flex flex-wrap items-center gap-4 md:col-span-4">
+          <select className="input md:w-48" value={origin} onChange={(e) => setOrigin(e.target.value as typeof origin)}>
+            <option value="all">Toutes les sources</option>
+            <option value="verified">Catalogue vérifié</option>
+            <option value="open">Base ouverte (étendue)</option>
+          </select>
+          {kinds.length > 0 && (
+            <select className="input md:w-48" value={kind} onChange={(e) => setKind(e.target.value as AccessoryKind | '')}>
+              <option value="">Tous les types</option>
+              {kinds.map((k) => (
+                <option key={k} value={k}>
+                  {ACCESSORY_LABELS[k]}
+                </option>
+              ))}
+            </select>
+          )}
+          <div className="flex flex-wrap items-center gap-4 md:col-span-3 lg:col-span-5">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={onlyCompatible} onChange={(e) => setOnlyCompatible(e.target.checked)} />
               Compatibles uniquement
@@ -163,11 +191,11 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
               const selected = c.id === selectedId
               const live = prices.isLive(c.id)
               return (
-                <li key={c.id}>
+                <li key={c.id} className="flex items-stretch gap-1.5">
                   <button
                     onClick={() => onPick(c)}
                     className={cn(
-                      'card-soft group flex w-full items-center gap-4 p-3 text-left transition hover:border-brand-500',
+                      'card-soft group flex min-w-0 flex-1 items-center gap-4 p-3 text-left transition hover:border-brand-500',
                       selected && 'border-brand-500 ring-1 ring-brand-500',
                       errors.length > 0 && 'opacity-70',
                     )}
@@ -176,6 +204,7 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold">{displayName(c)}</span>
                         <span className="chip">{TIER_LABELS[c.tier]}</span>
+                        {c.source && <span className="chip border-accent-500/40 text-accent-400">Base ouverte</span>}
                         <span className="muted text-xs">{c.releaseYear}</span>
                         {selected && (
                           <span className="chip border-brand-500 text-brand-400">
@@ -198,16 +227,26 @@ export function ComponentPicker({ category, slots, deviceType, profile, selected
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold tabular-nums">{formatPrice(prices.price(c))}</div>
-                      <div className={cn('text-[10px] uppercase tracking-wider', live ? 'text-emerald-400' : 'muted')}>{live ? 'Prix live' : 'Indicatif'}</div>
+                      <div className={cn('text-[10px] uppercase tracking-wider', live ? 'text-emerald-400' : 'muted')}>{live ? 'Prix live' : c.priceEstimated ? 'Converti USD' : 'Indicatif'}</div>
                     </div>
+                  </button>
+                  <button className="card-soft muted px-2 hover:border-brand-500 hover:text-brand-400" onClick={() => setDetails(c)} aria-label="Fiche produit" title="Fiche produit">
+                    <Info className="h-4 w-4" />
                   </button>
                 </li>
               )
             })}
           </ul>
-          {rows.length > visible.length && <p className="muted p-3 text-center text-xs">Affinez la recherche pour voir les {rows.length - visible.length} autres résultats.</p>}
+          {rows.length > visible.length && (
+            <div className="p-3 text-center">
+              <button className="btn btn-ghost btn-sm" onClick={() => setLimit(limit + 150)}>
+                Afficher plus ({rows.length - visible.length} restants)
+              </button>
+            </div>
+          )}
         </div>
       </div>
+      {details && <ProductDetails item={details} onClose={() => setDetails(null)} />}
     </div>
   )
 }

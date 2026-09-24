@@ -53,6 +53,20 @@ server {
 
 et `sudo certbot --nginx -d enginepc.heiphaistos.org`.
 
+## Mise à jour automatique des données ouvertes
+
+`deploy.sh` régénère déjà les données à chaque déploiement. Pour les rafraîchir chaque nuit sans redéployer :
+
+```bash
+crontab -e
+# puis ajouter :
+0 4 * * * $HOME/EnginePC/deploy/sync-data.sh >> $HOME/enginepc-sync.log 2>&1
+```
+
+Le script télécharge le dataset (GitHub) et les taux BCE, puis copie `public/data/` dans `/var/www/enginepc/data/`
+(`sudo rsync` : l'utilisateur du cron doit pouvoir lancer `sudo` sans mot de passe pour cette commande, ou
+utilisez `TARGET` vers un dossier dont il est propriétaire).
+
 ## Point important : les routes
 
 L'application utilise des URL propres (`/generer`, `/configurer/desktop`, `/partage/…`). Le serveur doit

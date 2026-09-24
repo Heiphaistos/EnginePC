@@ -2,7 +2,24 @@ import { Code2, Cpu, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '../lib/format'
+import { fetchExtraCatalog, fetchRates } from '../services/openData'
 import { useStore } from '../store/useStore'
+
+/** Charge la base étendue et les taux de change une fois par session. */
+function useOpenData() {
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const { setExtra, setRates } = useStore.getState()
+    setExtra([], { status: 'loading' })
+    fetchExtraCatalog(ctrl.signal)
+      .then((d) => setExtra(d.components, { status: 'ready', generatedAt: d.generatedAt, source: d.source }))
+      .catch(() => !ctrl.signal.aborted && setExtra([], { status: 'error' }))
+    fetchRates(ctrl.signal)
+      .then(setRates)
+      .catch(() => undefined)
+    return () => ctrl.abort()
+  }, [])
+}
 
 const NAV = [
   { to: '/generer', label: 'Générateur auto' },
@@ -23,6 +40,9 @@ export function Layout() {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
   useEffect(() => setOpen(false), [location.pathname])
+  useOpenData()
+  const currency = useStore((s) => s.priceSettings.currency)
+  const ratesDate = useStore((s) => s.rates.date)
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -77,7 +97,7 @@ export function Layout() {
         )}
       </header>
       <main className="flex-1">
-        <Outlet />
+        <Outlet key={currency === 'EUR' ? 'EUR' : `${currency}-${ratesDate ?? ''}`} />
       </main>
       <footer className="no-print border-t border-[var(--border)] py-8 text-sm">
         <div className="muted mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 md:flex-row">

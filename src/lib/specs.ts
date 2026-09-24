@@ -1,4 +1,4 @@
-import type { Device, PCComponent } from '../types'
+import type { AccessoryKind, Device, PCComponent } from '../types'
 import { formatCapacity } from './format'
 
 /** Caractéristiques clés d'un composant, sous forme de puces courtes. */
@@ -24,6 +24,8 @@ export function componentSpecs(c: PCComponent): string[] {
       return [`${c.ports}× ${c.speedGbps} Gb/s`, c.connector]
     case 'hba':
       return [c.kind === 'raid' ? 'RAID' : 'HBA', `${c.ports} ports`, c.interface]
+    case 'accessory':
+      return [ACCESSORY_LABELS[c.kind], ...c.specs]
   }
 }
 
@@ -40,6 +42,22 @@ export function deviceSpecs(d: Device): string[] {
     ...(d.weightKg ? [d.weightKg < 1 ? `${Math.round(d.weightKg * 1000)} g` : `${d.weightKg} kg`] : []),
     d.os,
   ]
+}
+
+export const ACCESSORY_LABELS: Record<AccessoryKind, string> = {
+  monitor: 'Écran',
+  keyboard: 'Clavier',
+  mouse: 'Souris',
+  headphones: 'Casque',
+  speakers: 'Enceintes',
+  webcam: 'Webcam',
+  'case-fan': 'Ventilateur',
+  'thermal-paste': 'Pâte thermique',
+  'wifi-card': 'Carte Wi-Fi',
+  'sound-card': 'Carte son',
+  ups: 'Onduleur',
+  os: 'Système d’exploitation',
+  'external-storage': 'Stockage externe',
 }
 
 export const TIER_LABELS: Record<string, string> = {

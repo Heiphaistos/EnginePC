@@ -9,6 +9,7 @@ import {
   Film,
   Gamepad2,
   HardDrive,
+  Keyboard,
   Laptop,
   Layers,
   MemoryStick,
@@ -60,6 +61,7 @@ export const CATEGORY_ICONS: Record<ComponentCategory, LucideIcon> = {
   cooler: Fan,
   nic: Network,
   hba: Zap,
+  accessory: Keyboard,
 }
 
 export function CategoryIcon({ category, className }: { category: ComponentCategory; className?: string }) {

@@ -1,6 +1,18 @@
-const eur = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+import { useStore } from '../store/useStore'
 
-export const formatPrice = (v: number) => eur.format(Math.round(v))
+const formatters = new Map<string, Intl.NumberFormat>()
+
+/** Formate un prix stocké en EUR dans la devise choisie (Paramètres), avec les taux BCE du jour. */
+export function formatPrice(eurValue: number): string {
+  const { priceSettings, rates } = useStore.getState()
+  const currency = rates.rates[priceSettings.currency] ? priceSettings.currency : 'EUR'
+  let f = formatters.get(currency)
+  if (!f) {
+    f = new Intl.NumberFormat('fr-FR', { style: 'currency', currency, maximumFractionDigits: 0 })
+    formatters.set(currency, f)
+  }
+  return f.format(Math.round(eurValue * (rates.rates[currency] ?? 1)))
+}
 
 export function formatCapacity(gb: number): string {
   if (gb >= 1000) {
@@ -11,7 +23,3 @@ export function formatCapacity(gb: number): string {
 }
 
 export const cn = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ')
-
-export function uid(): string {
-  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
-}

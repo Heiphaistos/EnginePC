@@ -1,4 +1,6 @@
-import { Check, ExternalLink } from 'lucide-react'
+import { Check, ExternalLink, Info } from 'lucide-react'
+import { useState } from 'react'
+import { ProductDetails } from './ProductDetails'
 import { cn, formatPrice } from '../lib/format'
 import { deviceSpecs } from '../lib/specs'
 import { usePriceProvider } from '../store/usePrices'
@@ -19,6 +21,7 @@ export function DeviceCard({
   badge?: string
 }) {
   const provider = usePriceProvider()
+  const [details, setDetails] = useState(false)
   const link = provider.productUrl({ id: device.id, name: `${device.brand} ${device.model}`, category: device.deviceType, ean: device.ean })
   return (
     <div className={cn('card relative flex flex-col p-5 transition hover:border-brand-500/60', selected && 'border-brand-500 ring-1 ring-brand-500')}>
@@ -55,12 +58,16 @@ export function DeviceCard({
             {selected ? 'Sélectionné' : 'Choisir'}
           </button>
         )}
+        <button className="btn btn-ghost btn-sm" onClick={() => setDetails(true)} title="Fiche produit et prix">
+          <Info className="h-3.5 w-3.5" /> Fiche
+        </button>
         {link && (
           <a className="btn btn-ghost btn-sm" href={link} target="_blank" rel="noreferrer">
             Prix <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
       </div>
+      {details && <ProductDetails item={device} onClose={() => setDetails(false)} />}
     </div>
   )
 }

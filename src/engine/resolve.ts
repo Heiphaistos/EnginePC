@@ -1,4 +1,5 @@
 import type {
+  Accessory,
   BuildSlots,
   Case,
   Cooler,
@@ -27,6 +28,7 @@ export interface ResolvedBuild {
   cooler?: Cooler
   nic?: NIC
   hba?: HBA
+  accessories: Accessory[]
 }
 
 export function resolveBuild(slots: BuildSlots, catalog: Catalog): ResolvedBuild {
@@ -44,6 +46,7 @@ export function resolveBuild(slots: BuildSlots, catalog: Catalog): ResolvedBuild
     cooler: lookup<Cooler>(catalog, slots.cooler),
     nic: lookup<NIC>(catalog, slots.nic),
     hba: lookup<HBA>(catalog, slots.hba),
+    accessories: many<Accessory>(slots.accessories),
   }
 }
 
@@ -69,6 +72,7 @@ export function lineItems(b: ResolvedBuild): { item: PCComponent; qty: number }[
   if (b.case) out.push({ item: b.case, qty: 1 })
   if (b.nic) out.push({ item: b.nic, qty: 1 })
   if (b.hba) out.push({ item: b.hba, qty: 1 })
+  pushGrouped(b.accessories)
   return out
 }
 

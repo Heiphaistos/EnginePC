@@ -31,6 +31,7 @@ export type ComponentCategory =
   | 'cooler'
   | 'nic'
   | 'hba'
+  | 'accessory'
 
 export type FormFactor = 'E-ATX' | 'ATX' | 'mATX' | 'ITX' | 'SSI-EEB' | 'Rack-1U' | 'Rack-2U' | 'Rack-4U'
 export type MemoryType = 'DDR4' | 'DDR5'
@@ -50,6 +51,12 @@ interface BaseComponent {
   /** EAN / MPN pour le câblage avec le comparateur de prix. */
   ean?: string
   mpn?: string
+  /** Provenance des données (absent = catalogue EnginePC vérifié). */
+  source?: string
+  /** Champs déduits/estimés automatiquement (non issus d'une fiche technique). */
+  estimated?: string[]
+  /** Le prix est une conversion (ex : USD → EUR TTC) et non un prix constaté en France. */
+  priceEstimated?: boolean
 }
 
 export interface CPU extends BaseComponent {
@@ -182,7 +189,33 @@ export interface HBA extends BaseComponent {
   interface: 'SAS3' | 'SAS4' | 'Tri-mode'
 }
 
-export type PCComponent = CPU | GPU | Motherboard | RAM | Storage | PSU | Case | Cooler | NIC | HBA
+export type AccessoryKind =
+  | 'monitor'
+  | 'keyboard'
+  | 'mouse'
+  | 'headphones'
+  | 'speakers'
+  | 'webcam'
+  | 'case-fan'
+  | 'thermal-paste'
+  | 'wifi-card'
+  | 'sound-card'
+  | 'ups'
+  | 'os'
+  | 'external-storage'
+
+/** Périphériques et accessoires : ajoutés au prix, sans règle de compatibilité. */
+export interface Accessory extends BaseComponent {
+  category: 'accessory'
+  kind: AccessoryKind
+  /** Caractéristiques libres déjà formatées (ex : "27\"", "2560×1440", "165 Hz"). */
+  specs: string[]
+  /** Moniteurs : fréquence de rafraîchissement (Hz) et hauteur de définition (px). */
+  refreshHz?: number
+  resolutionY?: number
+}
+
+export type PCComponent = CPU | GPU | Motherboard | RAM | Storage | PSU | Case | Cooler | NIC | HBA | Accessory
 
 /** Appareils complets (portable, tablette, téléphone, NAS clé en main). */
 export interface Device {
@@ -225,6 +258,7 @@ export interface BuildSlots {
   cooler?: string
   nic?: string
   hba?: string
+  accessories?: string[]
 }
 
 export interface Build {

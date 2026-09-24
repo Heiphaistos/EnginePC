@@ -294,7 +294,7 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   }
 
   // Alimentation
-  const partial: ResolvedBuild = { cpu, gpus: gpuList, motherboard: mb, ram, ramKits: 1, storage, case: pcCase, cooler, nic, hba }
+  const partial: ResolvedBuild = { cpu, gpus: gpuList, motherboard: mb, ram, ramKits: 1, storage, case: pcCase, cooler, nic, hba, accessories: [] }
   const needW = recommendedPsuW(partial)
   const psuCands = p.psus.filter((s) => {
     if (s.wattage < needW) return false
