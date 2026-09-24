@@ -132,7 +132,7 @@ export interface Storage extends BaseComponent {
   category: 'storage'
   kind: 'nvme' | 'ssd' | 'hdd'
   interface: StorageInterface
-  formFactorDrive: 'M.2 2280' | '2.5"' | '3.5"' | 'U.2'
+  formFactorDrive: 'M.2 2280' | 'M.2 2230' | '2.5"' | '3.5"' | 'U.2'
   capacityGB: number
   readMBs: number
   writeMBs: number

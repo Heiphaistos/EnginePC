@@ -14,8 +14,10 @@ import { psus } from './psus'
 import { rams } from './rams'
 import { storages } from './storages'
 import { tablets } from './tablets'
+import { moreComponents, moreDevices } from './more'
 
 export const baseComponents: PCComponent[] = [
+  ...moreComponents,
   ...cpus,
   ...gpus,
   ...motherboards,
@@ -29,7 +31,7 @@ export const baseComponents: PCComponent[] = [
   ...accessories,
 ]
 
-export const baseDevices: Device[] = [...laptops, ...tablets, ...phones, ...nasDevices]
+export const baseDevices: Device[] = [...laptops, ...tablets, ...phones, ...nasDevices, ...moreDevices]
 
 export const CATEGORY_LABELS: Record<ComponentCategory, string> = {
   cpu: 'Processeur',

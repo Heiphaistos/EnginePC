@@ -55,10 +55,13 @@ const byPrice = <T extends { price: number }>(a: T, b: T) => a.price - b.price
 /** Choisit le meilleur élément (le plus cher, donc le plus haut de gamme) dans l'enveloppe, sinon le moins cher. */
 function pickWithin<T extends { price: number }>(cands: T[], share: number): T | undefined {
   if (!cands.length) return undefined
-  const sorted = [...cands].sort(byPrice)
+  // Les pools sont triés par prix croissant une fois pour toutes (voir pools()) : pas de tri ici.
   let best: T | undefined
-  for (const c of sorted) if (c.price <= share) best = c
-  return best ?? sorted[0]
+  for (const c of cands) {
+    if (c.price > share) break
+    best = c
+  }
+  return best ?? cands[0]
 }
 
 /** Répartition du budget restant (hors CPU/GPU) par usage. */
@@ -112,6 +115,7 @@ function sizeAllows(ff: Motherboard['formFactor'], size: GeneratorPreferences['s
 }
 
 interface Pools {
+  boardsBySocket: Map<string, Motherboard[]>
   cpus: CPU[]
   gpus: GPU[]
   boards: Motherboard[]
@@ -123,6 +127,38 @@ interface Pools {
   nics: NIC[]
   hbas: HBA[]
 }
+
+/** Garde, pour chaque clé, l'élément le moins cher (réduit fortement l'espace de recherche du générateur). */
+function cheapestPer<T extends { price: number }>(items: T[], key: (t: T) => string): T[] {
+  const best = new Map<string, T>()
+  for (const it of items) {
+    const k = key(it)
+    const cur = best.get(k)
+    if (!cur || it.price < cur.price) best.set(k, it)
+  }
+  return [...best.values()]
+}
+
+/**
+ * Front de Pareto : retire les éléments « dominés » (plus chers, et pas meilleurs sur aucun critère)
+ * au sein d'un même groupe. Le générateur ne les choisirait jamais.
+ */
+function paretoFront<T extends { price: number }>(items: T[], group: (t: T) => string, crit: (t: T) => number[]): T[] {
+  const groups = new Map<string, T[]>()
+  for (const it of items) groups.set(group(it), [...(groups.get(group(it)) ?? []), it])
+  const out: T[] = []
+  for (const list of groups.values()) {
+    const vals = list.map(crit)
+    list.forEach((a, i) => {
+      const dominated = list.some((b, j) => j !== i && b.price <= a.price && vals[j].every((v, k) => v >= vals[i][k]) && (b.price < a.price || vals[j].some((v, k) => v > vals[i][k])))
+      if (!dominated) out.push(a)
+    })
+  }
+  return out
+}
+
+const largest = <T extends { capacityGB: number }>(items: T[]): T | undefined =>
+  items.reduce<T | undefined>((best, x) => (!best || x.capacityGB > best.capacityGB ? x : best), undefined)
 
 function pools(catalog: Catalog, input: GeneratorInput): Pools {
   const { deviceType, profile, budget } = input
@@ -177,17 +213,25 @@ function pools(catalog: Catalog, input: GeneratorInput): Pools {
       boards = boards.filter((m) => m.eccSupport || RDIMM_SOCKETS.has(m.socket))
     }
   }
+  const sorted = <T extends { price: number }>(xs: T[]) => [...xs].sort(byPrice)
+  boards = sorted(boards)
+  rams = sorted(rams)
+  cases = sorted(cases)
+  const boardsBySocket = new Map<string, Motherboard[]>()
+  for (const m of boards) boardsBySocket.set(m.socket, [...(boardsBySocket.get(m.socket) ?? []), m])
   return {
-    cpus,
-    gpus,
+    boardsBySocket,
+    cpus: paretoFront(cpus, (c) => `${c.socket}|${c.memoryTypes.join()}|${c.integratedGraphics}|${c.segment ?? ''}`, (c) => [c.singleThreadScore, c.multiThreadScore, -c.tdp, c.maxMemoryGB ?? 0, /x3d/i.test(c.model) ? 1 : 0]),
+    // Les modèles partenaires d'une même puce ont les mêmes scores : on ne garde que le moins cher de chaque puce/VRAM.
+    gpus: paretoFront(cheapestPer(gpus, (g) => `${g.chipset}|${g.vramGB}`), (g) => g.segment ?? '', (g) => [g.gamingScore, g.aiScore, g.vramGB, -g.tdp, -g.lengthMm]),
     boards,
     rams,
-    storages: getOfCategory<Storage>(catalog, 'storage'),
-    psus: getOfCategory<PSU>(catalog, 'psu'),
+    storages: sorted(getOfCategory<Storage>(catalog, 'storage')),
+    psus: sorted(getOfCategory<PSU>(catalog, 'psu')),
     cases,
-    coolers: getOfCategory<Cooler>(catalog, 'cooler'),
-    nics: getOfCategory<NIC>(catalog, 'nic'),
-    hbas: getOfCategory<HBA>(catalog, 'hba'),
+    coolers: sorted(getOfCategory<Cooler>(catalog, 'cooler')),
+    nics: sorted(getOfCategory<NIC>(catalog, 'nic')),
+    hbas: sorted(getOfCategory<HBA>(catalog, 'hba')),
   }
 }
 
@@ -205,9 +249,7 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   const weights = PLATFORM_WEIGHTS[profile === 'ai' ? 'ai' : profile === 'storage' || deviceType === 'nas' ? 'storage' : deviceType === 'server' ? 'server' : 'default']
 
   // Carte mère
-  const boards = p.boards.filter(
-    (m) => m.socket === cpu.socket && cpu.memoryTypes.includes(m.memoryType) && m.pcieX16Slots >= gpuList.length,
-  )
+  const boards = (p.boardsBySocket.get(cpu.socket) ?? []).filter((m) => cpu.memoryTypes.includes(m.memoryType) && m.pcieX16Slots >= gpuList.length)
   const mb = pickWithin(deviceType === 'nas' ? boards.filter((m) => m.sataPorts >= 4) .concat(boards).slice(0, Math.max(1, boards.length)) : boards, rest * weights.motherboard)
   if (!mb) return null
 
@@ -219,8 +261,8 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   const ramPool = (deviceType !== 'desktop' || prefs.ecc) && mb.eccSupport && ramOk.some((r) => r.ecc) ? ramOk.filter((r) => r.ecc) : ramOk
   const ramFits = ramPool.filter((r) => r.capacityGB >= ramTarget)
   const ram = ramFits.length
-    ? pickWithin(ramFits, Math.max(ramFits.sort(byPrice)[0].price, rest * weights.ram * 0.6))
-    : [...ramPool].sort((a, b) => b.capacityGB - a.capacityGB)[0]
+    ? pickWithin(ramFits, Math.max(ramFits[0].price, rest * weights.ram * 0.6))
+    : largest(ramPool)
   if (!ram) return null
 
   // Stockage
@@ -228,7 +270,7 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   const nvmes = p.storages.filter((s) => s.kind === 'nvme' && s.segment !== 'server')
   let hddCount = 0
   if (deviceType === 'nas' || profile === 'storage') {
-    const boot = [...nvmes].filter((s) => s.capacityGB >= 500).sort(byPrice)[0]
+    const boot = nvmes.find((s) => s.capacityGB >= 500)
     if (boot) storage.push(boot)
     const hdds = p.storages.filter((s) => s.kind === 'hdd' && s.nasRated)
     const hddBudget = rest * weights.storage - (boot?.price ?? 0)
@@ -245,7 +287,7 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
       }
     }
     if (!bestHdd && hdds.length) {
-      const cheapest = [...hdds].sort(byPrice)[0]
+      const cheapest = hdds[0]
       bestHdd = { d: cheapest, n: 2, tb: (cheapest.capacityGB * 2) / 1000 }
     }
     if (bestHdd) for (let i = 0; i < bestHdd.n; i++) storage.push(bestHdd.d)
@@ -253,10 +295,10 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   } else {
     const want = targetStorageGB(input)
     const fits = nvmes.filter((s) => s.capacityGB >= want)
-    const drive = fits.length ? pickWithin(fits, Math.max(fits.sort(byPrice)[0].price, rest * weights.storage)) : [...nvmes].sort((a, b) => b.capacityGB - a.capacityGB)[0]
+    const drive = fits.length ? pickWithin(fits, Math.max(fits[0].price, rest * weights.storage)) : largest(nvmes)
     if (drive) storage.push(drive)
     if (deviceType === 'server' && (profile === 'virtualization' || profile === 'ai')) {
-      const data = p.storages.filter((s) => s.segment === 'server' && s.kind !== 'hdd').sort(byPrice)
+      const data = p.storages.filter((s) => s.segment === 'server' && s.kind !== 'hdd')
       const extra = pickWithin(data, rest * 0.12)
       if (extra && extra.price < rest * 0.2) storage.push(extra, extra)
     }
@@ -269,7 +311,7 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   const needsHba = sataCount > mb.sataPorts || storage.some((s) => s.interface === 'SAS') || storage.some((s) => s.interface === 'U.2')
   if (needsHba) {
     const tri = storage.some((s) => s.interface === 'U.2')
-    hba = p.hbas.filter((h) => h.ports + mb.sataPorts >= sataCount && (!tri || isTriMode(h))).sort(byPrice)[0]
+    hba = p.hbas.find((h) => h.ports + mb.sataPorts >= sataCount && (!tri || isTriMode(h)))
     if (!hba && sataCount > mb.sataPorts) return null
   }
 
