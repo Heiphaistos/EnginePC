@@ -35,11 +35,18 @@ sudo certbot --nginx -d enginepc.heiphaistos.org
 
 Pour les mises à jour suivantes : `cd ~/EnginePC && ./deploy/deploy.sh`.
 
+## En-têtes de sécurité (CSP)
+
+`deploy/security-headers.conf` (CSP, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy) est inclus
+dans le `server` **et** dans chaque `location` (nginx n'hérite pas des `add_header` d'une location qui déclare les siens).
+`connect-src` autorise l'origine de `VITE_PRICE_API_URL` : le Dockerfile et `deploy.sh` la substituent à `__PRICE_API_ORIGIN__`.
+Si l'URL du comparateur est changée dans Paramètres vers un autre domaine, il faut aussi l'ajouter à la CSP.
+
 ## Option B — Docker
 
 ```bash
 cd ~/EnginePC
-docker compose up -d --build        # écoute sur 127.0.0.1:8080
+VITE_PRICE_API_URL=https://searchit.heiphaistos.org docker compose up -d --build   # écoute sur 127.0.0.1:8080
 ```
 
 Puis un reverse proxy nginx sur l'hôte :
