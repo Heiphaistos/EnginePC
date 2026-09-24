@@ -16,4 +16,17 @@
   <url><loc>https://enginepc.heiphaistos.org/generer?type=nas</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://enginepc.heiphaistos.org/generer?type=tablet</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://enginepc.heiphaistos.org/generer?type=phone</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/glossaire</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/faq</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/choisir-pc-gamer-2026</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/pc-ia-locale</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/station-de-travail-creation</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/serveur-homelab-virtualisation</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/nas-diy-ou-cle-en-main</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/choisir-pc-portable</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/choisir-smartphone</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/compatibilite-composants</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/alimentation-refroidissement</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://enginepc.heiphaistos.org/guides/pc-bureautique-teletravail</loc><changefreq>monthly</changefreq></url>
 </urlset>

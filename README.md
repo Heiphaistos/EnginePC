@@ -32,13 +32,15 @@ Production : https://enginepc.heiphaistos.org
 - **Comparateur de composants** : jusqu'à 4 pièces côte à côte, meilleures valeurs mises en évidence.
 - **Comparateur de prix** : prix live, liens produits et envoi de configurations — voir
   [docs/INTEGRATION.md](docs/INTEGRATION.md).
+- **Contenu** : 10 guides d'achat, glossaire de 95 termes, FAQ, configurations populaires en accueil.
+- **Catalogue** : vue grille ou tableau, filtres par source, fiches produit.
 - Thème sombre/clair, responsive mobile.
 
 ## Données
 
 | Source | Contenu | Accès |
 |---|---|---|
-| Catalogue vérifié (`src/data/catalog/`) | ~480 composants avec compatibilité et scores complets, ~340 appareils (115 smartphones, 123 portables, 58 tablettes, 40 NAS) | intégré, utilisé par le générateur |
+| Catalogue vérifié (`src/data/catalog/`) | ~750 composants et périphériques avec compatibilité et scores complets (dont 131 écrans, claviers, souris, casques, onduleurs…), ~340 appareils (115 smartphones, 123 portables, 58 tablettes, 40 NAS) | intégré, utilisé par le générateur |
 | [pc-part-dataset](https://github.com/docyx/pc-part-dataset) (MIT) | ~13 700 pièces PC et périphériques (CPU, GPU, cartes mères, RAM, SSD/HDD, alims, boîtiers, ventirads, écrans, claviers, souris, casques, onduleurs…) | `npm run sync` → `public/data/extra-catalog.json` |
 | BCE / [Frankfurter](https://frankfurter.app) | taux de change quotidiens (affichage multi-devises) | API gratuite sans clé + instantané `public/data/rates.json` |
 | Wikipédia | description et photo dans les fiches produit | API REST publique |
