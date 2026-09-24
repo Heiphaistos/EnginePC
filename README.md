@@ -40,7 +40,7 @@ Production : https://enginepc.heiphaistos.org
 
 | Source | Contenu | Accès |
 |---|---|---|
-| Catalogue vérifié (`src/data/catalog/` et `more/`) | ~2 150 composants et périphériques avec compatibilité et scores complets (dont ~580 écrans, claviers, souris, casques, onduleurs…), ~710 appareils (377 smartphones, 123 portables, 125 tablettes, 83 NAS) | intégré, utilisé par le générateur |
+| Catalogue vérifié (`src/data/catalog/` et `more/`) | ~2 150 composants et périphériques avec compatibilité et scores complets (dont ~580 écrans, claviers, souris, casques, onduleurs…), ~980 appareils (377 smartphones, 391 portables, 125 tablettes, 83 NAS) | intégré, utilisé par le générateur |
 | [pc-part-dataset](https://github.com/docyx/pc-part-dataset) (MIT) | ~13 700 pièces PC et périphériques (CPU, GPU, cartes mères, RAM, SSD/HDD, alims, boîtiers, ventirads, écrans, claviers, souris, casques, onduleurs…) | `npm run sync` → `public/data/extra-catalog.json` |
 | BCE / [Frankfurter](https://frankfurter.app) | taux de change quotidiens (affichage multi-devises) | API gratuite sans clé + instantané `public/data/rates.json` |
 | Wikipédia | description et photo dans les fiches produit | API REST publique |
