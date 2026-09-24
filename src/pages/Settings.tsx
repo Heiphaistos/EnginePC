@@ -1,5 +1,6 @@
-import { CheckCircle2, Loader2, Plug, Trash2, Upload, XCircle } from 'lucide-react'
+import { CheckCircle2, Database, Loader2, Plug, Trash2, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { QuoteSection, TaxSection } from './SettingsSections'
 import { createPriceProvider } from '../services/pricing'
 import { useCatalog } from '../store/catalog'
 import { useStore } from '../store/useStore'
@@ -12,6 +13,11 @@ export function Settings() {
   const clearCustomCatalog = useStore((s) => s.clearCustomCatalog)
   const custom = useStore((s) => s.customComponents.length + s.customDevices.length)
   const catalog = useCatalog()
+  const useExtended = useStore((s) => s.useExtended)
+  const setUseExtended = useStore((s) => s.setUseExtended)
+  const extra = useStore((s) => s.extra.length)
+  const extraMeta = useStore((s) => s.extraMeta)
+  const rates = useStore((s) => s.rates)
   const [form, setForm] = useState(settings)
   const [test, setTest] = useState<{ state: 'idle' | 'loading' | 'ok' | 'error'; message?: string }>({ state: 'idle' })
   const [syncMsg, setSyncMsg] = useState('')
@@ -57,6 +63,9 @@ export function Settings() {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-3xl font-bold">Paramètres</h1>
 
+      <TaxSection />
+      <QuoteSection />
+
       <section className="card mt-6 p-6">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <Plug className="h-5 w-5 text-brand-400" /> Connexion au comparateur de prix
@@ -74,27 +83,9 @@ export function Settings() {
             <span className="label">Clé d’API (optionnelle)</span>
             <input className="input" type="password" value={form.apiKey ?? ''} onChange={(e) => setForm({ ...form, apiKey: e.target.value || undefined })} />
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="grid gap-1 text-sm">
-              <span className="label">Pays</span>
-              <select className="input" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}>
-                {['FR', 'BE', 'CH', 'LU', 'DE', 'ES', 'IT', 'CA', 'US', 'UK'].map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1 text-sm">
-              <span className="label">Devise</span>
-              <select className="input" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-                {['EUR', 'CHF', 'CAD', 'USD', 'GBP'].map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
-          </div>
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-2">
-          <button className="btn btn-primary" onClick={() => setPriceSettings(form)}>
+          <button className="btn btn-primary" onClick={() => setPriceSettings({ baseUrl: form.baseUrl, apiKey: form.apiKey })}>
             Enregistrer
           </button>
           <button className="btn btn-ghost" onClick={runTest} disabled={!form.baseUrl}>
@@ -114,6 +105,49 @@ export function Settings() {
             <XCircle className="h-4 w-4" /> {test.message}
           </p>
         )}
+      </section>
+
+      <section className="card mt-6 p-6">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <Database className="h-5 w-5 text-brand-400" /> Sources de données
+        </h2>
+        <ul className="mt-3 flex flex-col gap-3 text-sm">
+          <li className="card-soft p-3">
+            <div className="font-semibold">Catalogue vérifié EnginePC</div>
+            <div className="muted text-xs">Composants et appareils décrits avec toutes les données de compatibilité et de performance. Utilisé par le générateur automatique.</div>
+          </li>
+          <li className="card-soft p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="font-semibold">
+                  Base ouverte étendue — {extra.toLocaleString('fr-FR')} produits{' '}
+                  {extraMeta.status === 'loading' && <span className="muted">(chargement…)</span>}
+                  {extraMeta.status === 'error' && <span className="text-red-400">(indisponible)</span>}
+                </div>
+                <div className="muted text-xs">
+                  <a className="text-brand-400 underline" href="https://github.com/docyx/pc-part-dataset" target="_blank" rel="noreferrer">
+                    pc-part-dataset
+                  </a>{' '}
+                  (licence MIT) : pièces PC et périphériques, prix US convertis en euros TTC, certaines caractéristiques estimées.
+                  {extraMeta.generatedAt && ` Synchronisée le ${new Date(extraMeta.generatedAt).toLocaleDateString('fr-FR')}.`}
+                </div>
+              </div>
+              <label className="flex shrink-0 items-center gap-2">
+                <input type="checkbox" checked={useExtended} onChange={(e) => setUseExtended(e.target.checked)} /> Activée
+              </label>
+            </div>
+          </li>
+          <li className="card-soft p-3">
+            <div className="font-semibold">Taux de change — {rates.source}</div>
+            <div className="muted text-xs">
+              Banque centrale européenne via api.frankfurter.app (gratuit, sans clé){rates.date && `, taux du ${rates.date}`}. {Object.keys(rates.rates).length} devises.
+            </div>
+          </li>
+          <li className="card-soft p-3">
+            <div className="font-semibold">Wikipédia</div>
+            <div className="muted text-xs">Description et photo dans les fiches produit (API REST publique).</div>
+          </li>
+        </ul>
       </section>
 
       <section className="card mt-6 p-6">

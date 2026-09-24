@@ -4,8 +4,12 @@
 set -euo pipefail
 TARGET=${TARGET:-/var/www/enginepc}
 cd "$(dirname "$0")/.."
+# Les données ouvertes sont régénérées à chaque déploiement : on écarte la version locale avant le pull
+git checkout -- public/data 2>/dev/null || true
 git pull --ff-only
 npm ci
+# Données ouvertes à jour (en cas d'échec réseau, l'instantané versionné est conservé)
+npm run sync || echo "⚠ synchro des données ouvertes impossible, instantané existant utilisé"
 npm test
 npm run build
 sudo mkdir -p "$TARGET"

@@ -2,7 +2,24 @@ import { Code2, Cpu, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '../lib/format'
+import { fetchExtraCatalog, fetchRates } from '../services/openData'
 import { useStore } from '../store/useStore'
+
+/** Charge la base étendue et les taux de change une fois par session. */
+function useOpenData() {
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const { setExtra, setRates } = useStore.getState()
+    setExtra([], { status: 'loading' })
+    fetchExtraCatalog(ctrl.signal)
+      .then((d) => setExtra(d.components, { status: 'ready', generatedAt: d.generatedAt, source: d.source }))
+      .catch(() => !ctrl.signal.aborted && setExtra([], { status: 'error' }))
+    fetchRates(ctrl.signal)
+      .then(setRates)
+      .catch(() => undefined)
+    return () => ctrl.abort()
+  }, [])
+}
 
 const NAV = [
   { to: '/generer', label: 'Générateur auto' },
@@ -23,6 +40,12 @@ export function Layout() {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
   useEffect(() => setOpen(false), [location.pathname])
+  useOpenData()
+  const currency = useStore((s) => s.priceSettings.currency)
+  const ratesDate = useStore((s) => s.rates.date)
+  const mode = useStore((s) => s.priceSettings.priceMode ?? 'ttc')
+  const vatKey = useStore((s) => `${s.priceSettings.country}-${s.priceSettings.vatRate ?? ''}-${s.priceSettings.vatExempt ?? ''}`)
+  const setPriceSettings = useStore((s) => s.setPriceSettings)
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -58,6 +81,18 @@ export function Layout() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-2">
+            <div className="card-soft flex p-0.5 text-xs font-semibold" role="group" aria-label="Affichage des prix">
+              {(['ttc', 'ht', 'both'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setPriceSettings({ priceMode: m })}
+                  className={cn('rounded-md px-2 py-1 transition', mode === m ? 'bg-brand-500 text-white' : 'muted hover:text-[var(--text)]')}
+                  title={m === 'both' ? 'Afficher HT et TTC' : `Prix ${m.toUpperCase()}`}
+                >
+                  {m === 'both' ? 'HT+TTC' : m.toUpperCase()}
+                </button>
+              ))}
+            </div>
             <button className="btn btn-ghost btn-sm" onClick={toggleTheme} aria-label="Changer de thème">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -77,7 +112,8 @@ export function Layout() {
         )}
       </header>
       <main className="flex-1">
-        <Outlet />
+        {/* Re-rendu des prix quand l'affichage change (sauf Paramètres, pour ne pas perdre la saisie en cours) */}
+        <Outlet key={location.pathname === '/parametres' ? 'settings' : `${mode}-${vatKey}-${currency === 'EUR' ? 'EUR' : `${currency}-${ratesDate ?? ''}`}`} />
       </main>
       <footer className="no-print border-t border-[var(--border)] py-8 text-sm">
         <div className="muted mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 md:flex-row">

@@ -20,26 +20,39 @@ Production : https://enginepc.heiphaistos.org
 - **Aperçu temps réel** : score par usage, FPS estimés 1080p/1440p/4K (goulot CPU inclus), taille de LLM
   exécutable en VRAM, tokens/s indicatifs, consommation et alimentation conseillée.
 - **Appareils complets** : portables, tablettes, smartphones et NAS clé en main classés par usage.
-- **Exports** : JSON (format d'échange), CSV Excel, Markdown, impression/PDF, lien de partage.
+- **Prix HT / TTC** : affichage TTC, HT ou les deux (bouton dans l'en-tête), TVA par pays (15 pays),
+  taux réduit personnalisable, franchise en base (art. 293 B du CGI), 12 devises (taux BCE).
+- **Exports** : JSON (format d'échange), CSV Excel et Markdown avec colonnes HT / TVA / TTC, impression/PDF,
+  lien de partage.
+- **Devis** : devis imprimable numéroté (coordonnées vendeur, client, lignes modifiables, prestations,
+  remise, HT / TVA / TTC, validité, conditions de paiement, bon pour accord).
 - **Mes configs** : sauvegarde locale, import JSON, comparaison côte à côte (jusqu'à 4).
 - **Comparateur de prix** : prix live, liens produits et envoi de configurations — voir
   [docs/INTEGRATION.md](docs/INTEGRATION.md).
 - Thème sombre/clair, responsive mobile.
 
-## Catalogue
+## Données
 
-~475 composants (CPU grand public/HEDT/serveur, GPU grand public/pro/datacenter, cartes mères de tous
-sockets, RAM DDR4/DDR5/RDIMM, SSD/HDD grand public et entreprise, alimentations, boîtiers tour/ITX/NAS/rack,
-refroidissements, cartes réseau, HBA/RAID) et ~160 appareils complets, dans `src/data/catalog/`.
-Prix **indicatifs** en euros : les prix réels viennent du comparateur une fois connecté. Le catalogue
-s'étend sans toucher au code via l'import JSON (Paramètres) ou la synchronisation `/api/v1/catalog`.
+| Source | Contenu | Accès |
+|---|---|---|
+| Catalogue vérifié (`src/data/catalog/`) | ~480 composants avec compatibilité et scores complets, ~340 appareils (115 smartphones, 123 portables, 58 tablettes, 40 NAS) | intégré, utilisé par le générateur |
+| [pc-part-dataset](https://github.com/docyx/pc-part-dataset) (MIT) | ~13 700 pièces PC et périphériques (CPU, GPU, cartes mères, RAM, SSD/HDD, alims, boîtiers, ventirads, écrans, claviers, souris, casques, onduleurs…) | `npm run sync` → `public/data/extra-catalog.json` |
+| BCE / [Frankfurter](https://frankfurter.app) | taux de change quotidiens (affichage multi-devises) | API gratuite sans clé + instantané `public/data/rates.json` |
+| Wikipédia | description et photo dans les fiches produit | API REST publique |
+| Marchands (Idealo, LDLC, Materiel.net, Amazon…) | liens de recherche depuis chaque fiche | liens, sans API |
+
+Les produits de la base ouverte sont marqués « Base ouverte » : prix US convertis en euros TTC, et certaines
+caractéristiques (dimensions, sockets des ventirads…) sont estimées. Les règles de compatibilité qui en dépendent
+deviennent des avertissements « à vérifier ». Le générateur automatique n'utilise que le catalogue vérifié.
+Les prix réels viennent du comparateur une fois connecté ([docs/INTEGRATION.md](docs/INTEGRATION.md)).
 
 ## Développement
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test         # tests du moteur (compatibilité, générateur, catalogue)
+npm test         # tests du moteur (compatibilité, générateur, catalogue, base ouverte)
+npm run sync     # régénère public/data/ depuis les sources ouvertes
 npm run build    # build de production dans dist/
 ```
 

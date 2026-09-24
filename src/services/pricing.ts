@@ -1,3 +1,5 @@
+import type { PriceMode } from '../lib/tax'
+
 /**
  * Câblage avec le comparateur de prix (site séparé).
  *
@@ -48,6 +50,12 @@ export interface PriceSettings {
   apiKey?: string
   currency: string
   country: string
+  /** Taux de TVA forcé (%) ; sinon taux du pays. */
+  vatRate?: number
+  /** Franchise en base de TVA (art. 293 B du CGI). */
+  vatExempt?: boolean
+  /** Affichage des prix : TTC, HT ou les deux. */
+  priceMode?: PriceMode
 }
 
 export class StaticPriceProvider implements PriceProvider {
@@ -114,4 +122,5 @@ export const DEFAULT_PRICE_SETTINGS: PriceSettings = {
   baseUrl: (import.meta.env.VITE_PRICE_API_URL as string | undefined) ?? '',
   currency: 'EUR',
   country: 'FR',
+  priceMode: 'ttc',
 }

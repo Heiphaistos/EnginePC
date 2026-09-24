@@ -40,6 +40,7 @@ export const CATEGORY_LABELS: Record<ComponentCategory, string> = {
   cooler: 'Refroidissement',
   nic: 'Carte réseau',
   hba: 'Contrôleur HBA / RAID',
+  accessory: 'Périphériques & accessoires',
 }
 
 export const CATEGORY_ORDER: ComponentCategory[] = [
