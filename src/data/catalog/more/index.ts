@@ -3,6 +3,8 @@ import { moreCases } from './cases'
 import { moreCoolers } from './coolers'
 import { moreCpus } from './cpus'
 import { moreGpus } from './gpus'
+import { moreLaptopsGaming } from './laptops-gaming'
+import { moreLaptopsOffice } from './laptops-office'
 import { moreMonitors } from './monitors'
 import { moreMotherboards } from './motherboards'
 import { moreNas } from './nas'
@@ -30,4 +32,4 @@ export const moreComponents: PCComponent[] = [
   ...morePeripherals,
 ]
 
-export const moreDevices: Device[] = [...morePhones, ...moreTablets, ...moreNas]
+export const moreDevices: Device[] = [...moreLaptopsGaming, ...moreLaptopsOffice, ...morePhones, ...moreTablets, ...moreNas]
