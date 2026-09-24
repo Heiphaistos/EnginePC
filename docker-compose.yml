@@ -1,0 +1,11 @@
+services:
+  enginepc:
+    build:
+      context: .
+      args:
+        VITE_PRICE_API_URL: ${VITE_PRICE_API_URL:-}
+    container_name: enginepc
+    restart: unless-stopped
+    # Exposé uniquement en local : le nginx de l'hôte fait le reverse proxy HTTPS.
+    ports:
+      - "127.0.0.1:8080:80"
