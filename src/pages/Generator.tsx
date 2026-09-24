@@ -217,7 +217,7 @@ export function Generator() {
               const ai = estimateAi(v.build.resolved)
               const key = `${v.key}-${v.build.total}`
               return (
-                <article key={v.key} className={cn('card flex flex-col p-5', v.key === 'best' && 'border-brand-500/70 ring-1 ring-brand-500/40')}>
+                <article key={v.key} className={cn('card flex flex-col p-5', v.key === 'best' && 'gradient-border shadow-[0_20px_50px_-30px_rgba(34,211,238,0.6)]')}>
                   <header className="flex items-start gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">

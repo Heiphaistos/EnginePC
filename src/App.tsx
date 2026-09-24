@@ -13,6 +13,10 @@ const Saved = lazy(() => import('./pages/Saved').then((m) => ({ default: m.Saved
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
 const Share = lazy(() => import('./pages/Share').then((m) => ({ default: m.Share })))
 const Quote = lazy(() => import('./pages/Quote').then((m) => ({ default: m.Quote })))
+const Guides = lazy(() => import('./pages/Guides').then((m) => ({ default: m.Guides })))
+const GuideDetail = lazy(() => import('./pages/Guides').then((m) => ({ default: m.GuideDetail })))
+const Glossary = lazy(() => import('./pages/Glossary').then((m) => ({ default: m.Glossary })))
+const Faq = lazy(() => import('./pages/Faq').then((m) => ({ default: m.Faq })))
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
 
 function PageLoader() {
@@ -40,6 +44,10 @@ export default function App() {
               <Route path="parametres" element={<Settings />} />
               <Route path="partage/:code" element={<Share />} />
               <Route path="devis/:code" element={<Quote />} />
+              <Route path="guides" element={<Guides />} />
+              <Route path="guides/:slug" element={<GuideDetail />} />
+              <Route path="glossaire" element={<Glossary />} />
+              <Route path="faq" element={<Faq />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
