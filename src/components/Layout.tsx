@@ -74,6 +74,9 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <a href="#contenu" className="sr-only z-50 rounded-lg bg-brand-600 px-4 py-2 text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+        Aller au contenu
+      </a>
       <header className="no-print sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4">
           <NavLink to="/" className="flex items-center gap-2 font-bold">
@@ -84,7 +87,7 @@ export function Layout() {
               Engine<span className="gradient-text">PC</span>
             </span>
           </NavLink>
-          <nav className="hidden flex-1 items-center gap-1 lg:flex">
+          <nav className="hidden flex-1 items-center gap-1 lg:flex" aria-label="Navigation principale">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
@@ -127,13 +130,13 @@ export function Layout() {
             <button className="btn btn-ghost btn-sm" onClick={toggleTheme} aria-label="Changer de thème">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <button className="btn btn-ghost btn-sm lg:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
+            <button className="btn btn-ghost btn-sm lg:hidden" onClick={() => setOpen(!open)} aria-label="Menu" aria-expanded={open} aria-controls="menu-mobile">
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </div>
         {open && (
-          <nav className="flex flex-col gap-1 border-t border-[var(--border)] px-4 py-3 lg:hidden">
+          <nav id="menu-mobile" aria-label="Navigation principale" className="flex flex-col gap-1 border-t border-[var(--border)] px-4 py-3 lg:hidden">
             <div className="flex gap-1 pb-2 sm:hidden">
               {(['ttc', 'ht', 'both'] as const).map((m) => (
                 <button key={m} onClick={() => setPriceSettings({ priceMode: m })} className={cn('btn btn-sm flex-1', mode === m ? 'btn-primary' : 'btn-ghost')}>
@@ -149,7 +152,7 @@ export function Layout() {
           </nav>
         )}
       </header>
-      <main className="flex-1">
+      <main id="contenu" tabIndex={-1} className="flex-1 outline-none">
         {/* Re-rendu des prix quand l'affichage change (sauf Paramètres, pour ne pas perdre la saisie en cours) */}
         <Outlet key={location.pathname === '/parametres' ? 'settings' : `${mode}-${vatKey}-${currency === 'EUR' ? 'EUR' : `${currency}-${ratesDate ?? ''}`}`} />
       </main>

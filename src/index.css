@@ -34,6 +34,25 @@
   color-scheme: dark;
 }
 
+/* Thème clair : les teintes « -400 » (pensées pour le fond sombre) sont trop pâles sur fond blanc.
+   On les assombrit pour garder un contraste AA (texte ≥ 4,5:1). */
+:root:not(.dark) {
+  --color-brand-400: #0e7490;
+  --color-accent-400: #6d28d9;
+  --color-emerald-400: #047857;
+  --color-emerald-500: #047857;
+  --color-amber-300: #92400e;
+  --color-amber-400: #b45309;
+  --color-amber-500: #b45309;
+  --color-red-400: #b91c1c;
+  --color-sky-400: #0369a1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
 html,
 body {
   background: var(--bg);
