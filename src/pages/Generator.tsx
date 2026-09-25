@@ -196,7 +196,7 @@ export function Generator() {
           )}
         </aside>
 
-        <section className={cn('transition-opacity', stale && 'opacity-60')}>
+        <section className={cn('min-w-0 transition-opacity', stale && 'opacity-60')}>
           {stale && (
             <div className="muted mb-3 flex items-center gap-2 text-sm">
               <Loader2 className="h-4 w-4 animate-spin" /> Calcul en cours…
@@ -210,17 +210,17 @@ export function Generator() {
             </div>
           )}
 
-          <div className="grid gap-5 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             {variants.map((v) => {
               const b = toBuild(v.build.slots, undefined, v.label)
               const fps = v.build.resolved.gpus.length || profile === 'gaming' ? estimateGamingFps(v.build.resolved) : []
               const ai = estimateAi(v.build.resolved)
               const key = `${v.key}-${v.build.total}`
               return (
-                <article key={v.key} className={cn('card flex flex-col p-5', v.key === 'best' && 'gradient-border shadow-[0_20px_50px_-30px_rgba(34,211,238,0.6)]')}>
+                <article key={v.key} className={cn('card flex min-w-0 flex-col p-5', v.key === 'best' && 'gradient-border shadow-[0_20px_50px_-30px_rgba(34,211,238,0.6)]')}>
                   <header className="flex items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h2 className="text-lg font-bold">{v.label}</h2>
                         {v.key === 'best' && <span className="rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-2 py-0.5 text-xs font-semibold text-white">Meilleur choix</span>}
                       </div>
@@ -264,7 +264,7 @@ export function Generator() {
                   <p className="muted mt-1 text-sm">Augmentez le budget ou changez de marque.</p>
                 </div>
               ) : (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {devices.map((r, i) => {
                     const best = [...devices].sort((a, b) => b.value - a.value)[0]
                     const b = toBuild(undefined, r.device.id, r.device.model)
