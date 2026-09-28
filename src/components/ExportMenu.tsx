@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Download, FileJson, FileSpreadsheet, FileText, Link2, Printer, Receipt, ShoppingCart } from 'lucide-react'
+import { Bot, Check, ChevronDown, Download, FileJson, FileSpreadsheet, FileText, Link2, Printer, Receipt, ShoppingCart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { vatRate } from '../lib/format'
 import { useEffect, useRef, useState } from 'react'
@@ -17,6 +17,7 @@ export function ExportMenu({ build, price, compact }: { build: Build; price?: (c
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedBot, setCopiedBot] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,6 +40,16 @@ export function ExportMenu({ build, price, compact }: { build: Build; price?: (c
         await navigator.clipboard.writeText(shareUrl(build))
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
+      },
+      keepOpen: true,
+    },
+    {
+      icon: copiedBot ? Check : Bot,
+      label: copiedBot ? 'Commande copiée !' : 'Copier pour Discord (/pc build)',
+      run: async () => {
+        await navigator.clipboard.writeText(`/pc build link:${shareUrl(build)}`)
+        setCopiedBot(true)
+        setTimeout(() => setCopiedBot(false), 2000)
       },
       keepOpen: true,
     },

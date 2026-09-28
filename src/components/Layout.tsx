@@ -44,9 +44,13 @@ export function Layout() {
   const [open, setOpen] = useState(false)
   const location = useLocation()
 
+  const accent = useStore((s) => s.accent)
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
+  useEffect(() => {
+    document.documentElement.dataset.accent = accent
+  }, [accent])
   useEffect(() => setOpen(false), [location.pathname])
   useEffect(() => {
     const p = location.pathname

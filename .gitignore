@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Généré au build (npm run catalog-index)
+public/data/catalog-index.json

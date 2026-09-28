@@ -5,6 +5,16 @@ import { DEFAULT_PRICE_SETTINGS, type PriceSettings } from '../services/pricing'
 import type { Build, BuildSlots, Device, DeviceType, PCComponent, UsageProfile } from '../types'
 import { uid } from '../lib/id'
 
+export const ACCENTS = [
+  { id: 'cyan', label: 'Cyan', color: '#06b6d4' },
+  { id: 'violet', label: 'Violet', color: '#8b5cf6' },
+  { id: 'emerald', label: 'Émeraude', color: '#10b981' },
+  { id: 'amber', label: 'Ambre', color: '#f59e0b' },
+  { id: 'rose', label: 'Rose', color: '#f43f5e' },
+  { id: 'blue', label: 'Bleu', color: '#3b82f6' },
+] as const
+export type Accent = (typeof ACCENTS)[number]['id']
+
 export interface QuoteInfo {
   company: string
   address: string
@@ -62,6 +72,8 @@ interface State {
   customComponents: PCComponent[]
   customDevices: Device[]
   theme: 'dark' | 'light'
+  /** Couleur d'accent de l'interface. */
+  accent: Accent
   /** Coordonnées du vendeur et options des devis. */
   quoteInfo: QuoteInfo
   /** Estimation du coût électrique : prix du kWh (€ TTC) et heures d'utilisation par jour. */
@@ -89,6 +101,7 @@ interface State {
   importCatalog: (components: PCComponent[], devices: Device[]) => void
   clearCustomCatalog: () => void
   toggleTheme: () => void
+  setAccent: (a: Accent) => void
   setQuoteInfo: (q: Partial<QuoteInfo>) => void
   setEnergy: (e: Partial<State['energy']>) => void
   nextQuoteNumber: () => string
@@ -108,6 +121,7 @@ export const useStore = create<State>()(
       customComponents: [],
       customDevices: [],
       theme: 'dark',
+      accent: 'cyan',
       quoteInfo: DEFAULT_QUOTE_INFO,
       energy: { kWhPrice: 0.2, hoursPerDay: 4 },
       quoteCounter: 0,
@@ -155,6 +169,7 @@ export const useStore = create<State>()(
         return `DEV-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}-${String(n).padStart(4, '0')}`
       },
       toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      setAccent: (accent) => set({ accent }),
       setUseExtended: (v) => set({ useExtended: v }),
       setExtra: (extra, extraMeta) => set({ extra, extraMeta }),
       setRates: (rates) => set({ rates }),
