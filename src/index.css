@@ -48,6 +48,73 @@
   --color-sky-400: #0369a1;
 }
 
+/* Couleurs d'accent (Paramètres → Apparence) : remplacent la palette « brand » et « accent ». */
+html[data-accent='violet'] {
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-accent-400: #e879f9;
+  --color-accent-500: #d946ef;
+  --color-accent-600: #c026d3;
+}
+html[data-accent='violet']:not(.dark) {
+  --color-brand-400: #6d28d9;
+  --color-accent-400: #a21caf;
+}
+html[data-accent='emerald'] {
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+}
+html[data-accent='emerald']:not(.dark) {
+  --color-brand-400: #047857;
+  --color-accent-400: #0e7490;
+}
+html[data-accent='amber'] {
+  --color-brand-300: #fcd34d;
+  --color-brand-400: #fbbf24;
+  --color-brand-500: #f59e0b;
+  --color-brand-600: #d97706;
+  --color-accent-400: #fb7185;
+  --color-accent-500: #f43f5e;
+  --color-accent-600: #e11d48;
+}
+html[data-accent='amber']:not(.dark) {
+  --color-brand-400: #b45309;
+  --color-accent-400: #be123c;
+}
+html[data-accent='rose'] {
+  --color-brand-300: #fda4af;
+  --color-brand-400: #fb7185;
+  --color-brand-500: #f43f5e;
+  --color-brand-600: #e11d48;
+  --color-accent-400: #a78bfa;
+  --color-accent-500: #8b5cf6;
+  --color-accent-600: #7c3aed;
+}
+html[data-accent='rose']:not(.dark) {
+  --color-brand-400: #be123c;
+  --color-accent-400: #6d28d9;
+}
+html[data-accent='blue'] {
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+}
+html[data-accent='blue']:not(.dark) {
+  --color-brand-400: #1d4ed8;
+  --color-accent-400: #0e7490;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
@@ -75,8 +142,8 @@ body {
 
 .dark body {
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(34, 211, 238, 0.08), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(139, 92, 246, 0.1), transparent 60%),
+    radial-gradient(1200px 600px at 10% -10%, color-mix(in srgb, var(--color-brand-400) 8%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--color-accent-500) 10%, transparent), transparent 60%),
     var(--bg);
   background-attachment: fixed;
 }
@@ -127,7 +194,7 @@ body {
   .card-glow:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--color-brand-500) 55%, var(--border));
-    box-shadow: 0 18px 40px -24px rgba(34, 211, 238, 0.45);
+    box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--color-brand-400) 45%, transparent);
   }
   .glass {
     background: color-mix(in srgb, var(--bg-elev) 72%, transparent);
@@ -168,7 +235,7 @@ body {
   .btn-primary {
     background: linear-gradient(135deg, var(--color-brand-500), var(--color-accent-500));
     color: white;
-    box-shadow: 0 6px 20px -8px rgba(34, 211, 238, 0.6);
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--color-brand-400) 60%, transparent);
   }
   .btn-primary:hover:not(:disabled) {
     filter: brightness(1.1);

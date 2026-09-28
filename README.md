@@ -34,7 +34,12 @@ Production : https://enginepc.heiphaistos.org
   [docs/INTEGRATION.md](docs/INTEGRATION.md).
 - **Contenu** : 10 guides d'achat, glossaire de 95 termes, FAQ, configurations populaires en accueil.
 - **Catalogue** : vue grille ou tableau, filtres par source, fiches produit.
-- Thème sombre/clair, responsive mobile.
+- **Bot Discord HeiphaisBot** : « Exporter / partager → Copier pour Discord » prépare la commande `/pc build`, que le bot
+  chiffre au meilleur prix via SearchIT ; `/pc generate` ouvre le générateur prérempli (`/generer?type=&profile=&budget=`).
+  Liste des commandes dans **Paramètres → Bot Discord** (`VITE_DISCORD_INVITE_URL` affiche un bouton d'invitation).
+- **Index du catalogue** `/data/catalog-index.json` (généré au build, ~16 000 produits : id, nom, catégorie, marque, prix,
+  EAN/MPN) : permet au bot et à SearchIT de retrouver chaque pièce d'une configuration partagée.
+- Thème sombre/clair et 6 couleurs d'accent (Paramètres → Apparence), responsive mobile.
 
 ## Données
 

@@ -1,11 +1,12 @@
 {
   "name": "enginepc",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && npm run catalog-index && vite build",
+    "catalog-index": "tsx scripts/export-catalog-index.ts",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",

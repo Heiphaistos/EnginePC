@@ -1,6 +1,6 @@
 import { CheckCircle2, Database, Loader2, Plug, Trash2, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { QuoteSection, TaxSection } from './SettingsSections'
+import { AppearanceSection, DiscordSection, QuoteSection, TaxSection } from './SettingsSections'
 import { createPriceProvider } from '../services/pricing'
 import { useCatalog } from '../store/catalog'
 import { useStore } from '../store/useStore'
@@ -63,8 +63,10 @@ export function Settings() {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-3xl font-bold">Paramètres</h1>
 
+      <AppearanceSection />
       <TaxSection />
       <QuoteSection />
+      <DiscordSection />
 
       <section className="card mt-6 p-6">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
