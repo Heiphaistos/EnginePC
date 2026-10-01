@@ -344,3 +344,36 @@ input[type='range'] {
     linear-gradient(var(--bg-elev), var(--bg-elev)) padding-box,
     linear-gradient(135deg, var(--color-brand-500), var(--color-accent-500)) border-box;
 }
+
+/* Accueil : vue éclatée 3D (src/pages/home/ExplodedView.tsx) */
+.exploded-glow {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-brand-500) 22%, transparent), color-mix(in srgb, var(--color-accent-500) 10%, transparent) 60%, transparent);
+}
+.exploded-canvas {
+  opacity: 0;
+}
+.exploded-canvas.is-ready {
+  opacity: 1;
+}
+.exploded-step {
+  border-color: var(--border);
+}
+.exploded-step.is-active {
+  border-color: color-mix(in srgb, var(--color-brand-500) 55%, var(--border));
+}
+@media (min-width: 1024px) {
+  .exploded-step:not(.is-active) {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .exploded-canvas {
+    transition: opacity 0.8s ease;
+  }
+  .exploded-step {
+    transition: opacity 0.4s ease, border-color 0.4s ease, translate 0.4s ease;
+  }
+  .exploded-step:not(.is-active) {
+    translate: 0 12px;
+  }
+}

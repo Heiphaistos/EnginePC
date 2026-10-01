@@ -11,7 +11,8 @@ export default defineConfig({
         // Bibliothèques et catalogue dans des fichiers séparés : mis en cache d'un déploiement à l'autre.
         codeSplitting: {
           groups: [
-            { name: 'vendor', test: /node_modules/ },
+            // three (vue éclatée de l'accueil) reste hors du lot commun : chargé seulement à l'approche de la section.
+            { name: 'vendor', test: /node_modules[\/](?!three[\/])/ },
             { name: 'catalog', test: /src[\\/]data[\\/]catalog/ },
           ],
         },

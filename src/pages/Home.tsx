@@ -11,6 +11,7 @@ import { lineItems } from '../engine/resolve'
 import { estimateGamingFps } from '../engine/scoring'
 import { useCatalog } from '../store/catalog'
 import { useGeneratedVariants } from '../store/useGenerator'
+import { ExplodedView } from './home/ExplodedView'
 import { GuidesTeaser } from './home/GuidesTeaser'
 
 const HERO_INPUT = { deviceType: 'desktop' as const, profile: 'gaming' as const, budget: 1600 }
@@ -54,6 +55,8 @@ export function Home() {
           <HeroPreview />
         </div>
       </section>
+
+      <ExplodedView />
 
       <section className="mx-auto max-w-7xl px-4 pb-20">
         <SectionTitle kicker="Tous les appareils" title="Que voulez-vous configurer ?" />
