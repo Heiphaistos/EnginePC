@@ -66,6 +66,9 @@ export function Layout() {
       : p.startsWith('/guides') ? 'Guides d’achat'
       : p.startsWith('/glossaire') ? 'Glossaire'
       : p.startsWith('/faq') ? 'Questions fréquentes'
+      : p.startsWith('/mentions-legales') ? 'Mentions légales'
+      : p.startsWith('/confidentialite') ? 'Confidentialité'
+      : p.startsWith('/cgu') ? 'Conditions d’utilisation'
       : 'Page introuvable'
     document.title = `EnginePC — ${page}`
   }, [location.pathname])
@@ -196,6 +199,11 @@ export function Layout() {
           <a className="flex items-center gap-1.5 hover:text-[var(--text)]" href="https://github.com/Heiphaistos/EnginePC" target="_blank" rel="noreferrer">
             <Code2 className="h-4 w-4" /> Code source
           </a>
+          <nav aria-label="Informations légales" className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <NavLink to="/mentions-legales" className="hover:text-[var(--text)]">Mentions légales</NavLink>
+            <NavLink to="/confidentialite" className="hover:text-[var(--text)]">Confidentialité</NavLink>
+            <NavLink to="/cgu" className="hover:text-[var(--text)]">Conditions d’utilisation</NavLink>
+          </nav>
         </div>
       </footer>
     </div>

@@ -17,6 +17,9 @@ const Guides = lazy(() => import('./pages/Guides').then((m) => ({ default: m.Gui
 const GuideDetail = lazy(() => import('./pages/Guides').then((m) => ({ default: m.GuideDetail })))
 const Glossary = lazy(() => import('./pages/Glossary').then((m) => ({ default: m.Glossary })))
 const Faq = lazy(() => import('./pages/Faq').then((m) => ({ default: m.Faq })))
+const MentionsLegales = lazy(() => import('./pages/Legal').then((m) => ({ default: m.MentionsLegales })))
+const Confidentialite = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Confidentialite })))
+const Cgu = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Cgu })))
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
 
 function PageLoader() {
@@ -48,6 +51,9 @@ export default function App() {
               <Route path="guides/:slug" element={<GuideDetail />} />
               <Route path="glossaire" element={<Glossary />} />
               <Route path="faq" element={<Faq />} />
+              <Route path="mentions-legales" element={<MentionsLegales />} />
+              <Route path="confidentialite" element={<Confidentialite />} />
+              <Route path="cgu" element={<Cgu />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
