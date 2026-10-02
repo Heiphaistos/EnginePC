@@ -5,4 +5,5 @@
 # reconstruire le conteneur, pas un dossier statique que nginx ne sert pas.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-docker compose up -d --build --remove-orphans
+docker compose build --pull
+docker compose up -d --remove-orphans

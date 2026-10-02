@@ -10,7 +10,7 @@ ENV VITE_PRICE_API_URL=$VITE_PRICE_API_URL
 RUN npm run build
 
 # --- Runtime ---
-FROM nginx:1.27-alpine
+FROM nginx:alpine
 ARG VITE_PRICE_API_URL=""
 COPY deploy/nginx.docker.conf /etc/nginx/conf.d/default.conf
 COPY deploy/security-headers.conf /etc/nginx/snippets/security-headers.conf
