@@ -9,11 +9,13 @@ import { Icon } from '../components/Icon'
 import { ScoreRing } from '../components/Score'
 import { DEVICE_TYPE_BY_ID, DEVICE_TYPES, PROFILE_BY_ID, profilesFor } from '../data/profiles'
 import { recommendDevices, type AssembledType, type GeneratorPreferences } from '../engine/generator'
+import { lineItems, totalPrice } from '../engine/resolve'
 import { estimateAi, estimateGamingFps } from '../engine/scoring'
 import { cn, priceMode, vatRate } from '../lib/format'
 import { CATALOG_VAT } from '../lib/tax'
 import { useCatalog } from '../store/catalog'
 import { useGeneratedVariants } from '../store/useGenerator'
+import { useLivePrices } from '../store/usePrices'
 import { newBuild, useStore } from '../store/useStore'
 import type { Build, DeviceType, UsageProfile } from '../types'
 
@@ -58,6 +60,9 @@ export function Generator() {
   const { variants, loading: stale } = useGeneratedVariants(
     assembled ? { deviceType: type as AssembledType, profile, budget: engineBudget, prefs } : null,
   )
+  // Mêmes prix (cache live partagé) que le configurateur : le total affiché ici est celui qu'on retrouve en personnalisant.
+  const variantItems = useMemo(() => variants.flatMap((v) => lineItems(v.build.resolved).map((l) => l.item)), [variants])
+  const prices = useLivePrices(variantItems)
   const devices = useMemo(
     () =>
       input.assembled
@@ -225,7 +230,7 @@ export function Generator() {
                         {v.key === 'best' && <span className="rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-2 py-0.5 text-xs font-semibold text-white">Meilleur choix</span>}
                       </div>
                       <p className="muted text-xs">{v.description}</p>
-                      <div className="mt-2 text-3xl font-bold"><Price value={v.build.total} subClassName="text-sm" /></div>
+                      <div className="mt-2 text-3xl font-bold"><Price value={totalPrice(v.build.resolved, prices.price)} subClassName="text-sm" /></div>
                     </div>
                     <ScoreRing value={v.build.score} size={84} />
                   </header>
@@ -240,7 +245,7 @@ export function Generator() {
                     </div>
                   )}
                   <div className="mt-3 flex-1">
-                    <BuildParts resolved={v.build.resolved} specs={false} />
+                    <BuildParts resolved={v.build.resolved} price={prices.price} specs={false} />
                   </div>
                   <footer className="no-print mt-4 flex flex-wrap gap-2 [&>*]:flex-1">
                     <button className="btn btn-primary btn-sm" onClick={() => customize(b)}>

@@ -14,6 +14,13 @@ const pending = new Set<string>()
 const failures = new Map<string, { until: number; message: string }>()
 const health = new Map<string, { demo: boolean } | 'pending' | 'error'>()
 
+/**
+ * Une « meilleure offre » à plus de 3× (ou moins d'1/3) du prix catalogue est un autre produit,
+ * un lot ou une revente gonflée (ex. carte mère B760M à 419 € chez un vendeur marketplace) : prix catalogue gardé.
+ * ponytail: seuil fixe, à affiner par catégorie si de vraies hausses dépassent 3×.
+ */
+export const plausible = (live: number, catalog: number) => !(catalog > 0) || (live <= catalog * 3 && live >= catalog / 3)
+
 const RETRY_AFTER_MS = 60_000
 const DEBOUNCE_MS = 300
 const BATCH_SIZE = 100
@@ -50,7 +57,7 @@ function requestPrices(provider: PriceProvider, items: PCComponent[]) {
         const byId = new Map(res.map((r) => [r.id, r]))
         chunk.forEach((i) => {
           const r = byId.get(i.id)
-          cache.set(`${base}|${i.id}`, r?.best ? r : null)
+          cache.set(`${base}|${i.id}`, r?.best && plausible(r.best.price, i.price) ? r : null)
         })
         failures.delete(base)
       })
