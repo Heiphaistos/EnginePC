@@ -94,6 +94,22 @@ export function useComparatorHealth(): { demo: boolean } | null {
   return h && typeof h === 'object' ? h : null
 }
 
+/**
+ * Tous les prix déjà connus du comparateur (id -> meilleure offre plausible, `null` = pas d'offre : prix catalogue),
+ * pour que le générateur sélectionne avec les prix affichés.
+ */
+export function useKnownLivePrices(): Record<string, number | null> {
+  const base = usePriceProvider().baseUrl
+  const v = useCacheVersion()
+  return useMemo(() => {
+    const out: Record<string, number | null> = {}
+    if (!base) return out
+    for (const [k, r] of cache) if (k.startsWith(`${base}|`)) out[k.slice(base.length + 1)] = r?.best?.price ?? null
+    return out
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [base, v])
+}
+
 export interface LivePrices {
   provider: PriceProvider
   results: Map<string, PriceResult>
@@ -117,9 +133,10 @@ export function useLivePrices(items: PCComponent[]): LivePrices {
     if (!base) return
     const t = setTimeout(() => requestPrices(provider, items), DEBOUNCE_MS)
     return () => clearTimeout(t)
-    // `key` résume `items` : inutile de relancer à chaque nouveau tableau.
+    // `key` résume `items` : inutile de relancer à chaque nouveau tableau. `v` : après une panne levée par une autre
+    // réponse, les articles restés sans prix sont redemandés (sinon le générateur attendait indéfiniment).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, provider, base])
+  }, [key, provider, base, v])
 
   return useMemo(() => {
     const results = new Map<string, PriceResult>()

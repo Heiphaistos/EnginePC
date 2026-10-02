@@ -96,7 +96,7 @@ describe('générateur : chaque profil et budget donne une configuration compati
         it(`${t.id} / ${p.id} / ${budget} €`, () => {
           const b = generateBuild(catalog, { deviceType: t.id as AssembledType, profile: p.id, budget })
           expect(b, 'aucune configuration').not.toBeNull()
-          expect(b!.total).toBeLessThanOrEqual(budget * 1.03)
+          expect(b!.total).toBeLessThanOrEqual(budget)
           expect(checkBuild(b!.slots, catalog, t.id).filter((i) => i.severity === 'error')).toEqual([])
         })
       }

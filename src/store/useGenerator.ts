@@ -4,7 +4,7 @@ import type { WorkerRequest } from '../engine/generator.worker'
 import { useStore } from './useStore'
 
 /** Génération des variantes dans un Web Worker : l'interface reste fluide pendant le calcul. */
-export function useGeneratedVariants(input: GeneratorInput | null): { variants: BuildVariant[]; loading: boolean } {
+export function useGeneratedVariants(input: GeneratorInput | null, prices: Record<string, number | null> = {}, knownOnly = false): { variants: BuildVariant[]; loading: boolean } {
   const workerRef = useRef<Worker | null>(null)
   const reqId = useRef(0)
   const sentCustom = useRef<unknown>(null)
@@ -12,7 +12,7 @@ export function useGeneratedVariants(input: GeneratorInput | null): { variants: 
   const customDevices = useStore((s) => s.customDevices)
   const [state, setState] = useState<{ variants: BuildVariant[]; doneId: number }>({ variants: [], doneId: 0 })
   const [pendingId, setPendingId] = useState(0)
-  const key = JSON.stringify(input)
+  const key = JSON.stringify([input, prices, knownOnly])
 
   useEffect(() => {
     const w = new Worker(new URL('../engine/generator.worker.ts', import.meta.url), { type: 'module' })
@@ -28,7 +28,7 @@ export function useGeneratedVariants(input: GeneratorInput | null): { variants: 
     if (!input || !workerRef.current) return
     const id = ++reqId.current
     const custom = customComponents.length || customDevices.length ? { components: customComponents, devices: customDevices } : undefined
-    const msg: WorkerRequest = { id, input }
+    const msg: WorkerRequest = { id, input, prices, knownOnly }
     if (sentCustom.current !== custom) {
       msg.custom = custom ?? { components: [], devices: [] }
       sentCustom.current = custom

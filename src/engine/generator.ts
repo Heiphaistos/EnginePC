@@ -14,7 +14,7 @@ import type {
   Storage,
   UsageProfile,
 } from '../types'
-import { getOfCategory, type Catalog } from './catalog'
+import { getOfCategory, withPrices, type Catalog } from './catalog'
 import { checkResolved, isTriMode, RDIMM_SOCKETS } from './compatibility'
 import { recommendedPsuW, totalPrice, type ResolvedBuild } from './resolve'
 import { scoreDevice, scoreResolved } from './scoring'
@@ -353,7 +353,8 @@ function assemble(input: GeneratorInput, p: Pools, cpu: CPU, gpuList: GPU[]): Ge
   const resolved: ResolvedBuild = { ...partial, psu }
   if (checkResolved(resolved, deviceType).some((i) => i.severity === 'error')) return null
   const total = totalPrice(resolved)
-  if (total > budget * 1.03) return null
+  // Budget strict : le total affiché (prix live injectés via withPrices) ne doit jamais le dépasser.
+  if (total > budget) return null
   const slots: BuildSlots = {
     cpu: cpu.id,
     gpu: gpuList.map((g) => g.id),
@@ -405,23 +406,27 @@ export interface BuildVariant {
   key: 'eco' | 'best' | 'premium' | 'alt'
   label: string
   description: string
+  /** Budget visé par cette variante (le total affiché ne doit pas le dépasser). */
+  budget: number
   build: GeneratedBuild
 }
 
 /** Plusieurs propositions : économique, recommandée, premium et alternative de marque. */
 export function generateVariants(catalog: Catalog, input: GeneratorInput): BuildVariant[] {
   const out: BuildVariant[] = []
+  const ecoBudget = Math.round(input.budget * 0.72)
+  const premiumBudget = Math.round(input.budget * 1.35)
   const best = generateBuild(catalog, input)
-  const eco = generateBuild(catalog, { ...input, budget: Math.round(input.budget * 0.72) })
-  const premium = generateBuild(catalog, { ...input, budget: Math.round(input.budget * 1.35) })
-  if (eco) out.push({ key: 'eco', label: 'Économique', description: `≈ -28 % de budget`, build: eco })
-  if (best) out.push({ key: 'best', label: 'Recommandée', description: 'Le meilleur score pour votre budget', build: best })
-  if (premium) out.push({ key: 'premium', label: 'Premium', description: `≈ +35 % de budget`, build: premium })
+  const eco = generateBuild(catalog, { ...input, budget: ecoBudget })
+  const premium = generateBuild(catalog, { ...input, budget: premiumBudget })
+  if (eco) out.push({ key: 'eco', label: 'Économique', description: `≈ -28 % de budget`, budget: ecoBudget, build: eco })
+  if (best) out.push({ key: 'best', label: 'Recommandée', description: 'Le meilleur score pour votre budget', budget: input.budget, build: best })
+  if (premium) out.push({ key: 'premium', label: 'Premium', description: `≈ +35 % de budget`, budget: premiumBudget, build: premium })
   const cpuBrand = best?.resolved.cpu?.brand
   if (best && (!input.prefs?.cpuBrand || input.prefs.cpuBrand === 'any') && cpuBrand) {
     const other = cpuBrand === 'AMD' ? 'Intel' : 'AMD'
     const alt = generateBuild(catalog, { ...input, prefs: { ...input.prefs, cpuBrand: other } })
-    if (alt) out.push({ key: 'alt', label: `Alternative ${other}`, description: `Même budget, plateforme ${other}`, build: alt })
+    if (alt) out.push({ key: 'alt', label: `Alternative ${other}`, description: `Même budget, plateforme ${other}`, budget: input.budget, build: alt })
   }
   // Dédoublonnage
   const seen = new Set<string>()
@@ -431,6 +436,17 @@ export function generateVariants(catalog: Catalog, input: GeneratorInput): Build
     seen.add(key)
     return true
   })
+}
+
+/**
+ * Variantes choisies aux prix du marché connus (voir withPrices). `knownOnly` : uniquement des pièces au prix connu,
+ * une variante introuvable ainsi garde sa sélection estimée.
+ */
+export function generatePricedVariants(catalog: Catalog, input: GeneratorInput, prices: Record<string, number | null> = {}, knownOnly = false): BuildVariant[] {
+  const variants = generateVariants(withPrices(catalog, prices), input)
+  if (!knownOnly) return variants
+  const strict = generateVariants(withPrices(catalog, prices, true), input)
+  return variants.map((v) => strict.find((s) => s.key === v.key) ?? v)
 }
 
 export interface DevicePreferences {

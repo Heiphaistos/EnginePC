@@ -15,9 +15,9 @@ import { cn, priceMode, vatRate } from '../lib/format'
 import { CATALOG_VAT } from '../lib/tax'
 import { useCatalog } from '../store/catalog'
 import { useGeneratedVariants } from '../store/useGenerator'
-import { useLivePrices } from '../store/usePrices'
+import { useKnownLivePrices, useLivePrices } from '../store/usePrices'
 import { newBuild, useStore } from '../store/useStore'
-import type { Build, DeviceType, UsageProfile } from '../types'
+import type { Build, DeviceType, PCComponent, UsageProfile } from '../types'
 
 const toSlider = (v: number, [min, max]: [number, number]) => Math.log(v / min) / Math.log(max / min)
 const fromSlider = (t: number, [min, max]: [number, number]) => {
@@ -57,12 +57,32 @@ export function Generator() {
 
   const assembled = info.assembled && !(type === 'nas' && nasMode === 'turnkey')
   const input = { type, profile, budget: engineBudget, prefs, deviceBrand, assembled }
-  const { variants, loading: stale } = useGeneratedVariants(
+  // Prix live utilisés pour la sélection : instantané des prix connus, renouvelé seulement quand une variante dépasse son budget.
+  // Tour 0 et 1 : prix connus + estimation des autres ; tour 2 : uniquement des pièces au prix connu (plus d'appel au comparateur).
+  // Mesuré : 2 tours d'appels (~10 s chacun) au lieu de 4 à 6 sans ce dernier tour.
+  const knownPrices = useKnownLivePrices()
+  const [priceError, setPriceError] = useState(false)
+  const inputKey = JSON.stringify([type, profile, engineBudget, prefs])
+  const [selection, setSelection] = useState({ key: inputKey, prices: knownPrices, round: 0 })
+  if (selection.key !== inputKey) setSelection({ key: inputKey, prices: knownPrices, round: 0 })
+  const { variants, loading: computing } = useGeneratedVariants(
     assembled ? { deviceType: type as AssembledType, profile, budget: engineBudget, prefs } : null,
+    selection.prices,
+    // Pas pendant une panne du comparateur : trop peu de prix connus, la config serait bridée.
+    selection.round >= 2 && !priceError,
   )
   // Mêmes prix (cache live partagé) que le configurateur : le total affiché ici est celui qu'on retrouve en personnalisant.
-  const variantItems = useMemo(() => variants.flatMap((v) => lineItems(v.build.resolved).map((l) => l.item)), [variants])
+  // Les pièces renvoyées par le worker portent des prix estimés : on repart des fiches du catalogue.
+  const variantItems = useMemo(() => variants.flatMap((v) => lineItems(v.build.resolved).map((l) => catalog.byId.get(l.item.id) ?? l.item)), [variants, catalog])
   const prices = useLivePrices(variantItems)
+  if (priceError !== !!prices.error) setPriceError(!!prices.error)
+  const shownPrice = (c: PCComponent) => prices.price(catalog.byId.get(c.id) ?? c)
+  // Une variante dépasse son budget au prix affiché : nouvelle sélection avec tous les prix live connus (1 à 2 tours en pratique).
+  const priced = !prices.provider.baseUrl || !!prices.error || variantItems.every((i) => i.id in knownPrices)
+  const overBudget = !computing && priced && variants.some((v) => totalPrice(v.build.resolved, shownPrice) > v.budget)
+  const readjust = overBudget && Object.keys(knownPrices).some((id) => !(id in selection.prices))
+  if (readjust) setSelection({ key: inputKey, prices: knownPrices, round: selection.round + 1 })
+  const stale = computing || readjust || (assembled && !priced)
   const devices = useMemo(
     () =>
       input.assembled
@@ -204,14 +224,14 @@ export function Generator() {
         <section className={cn('min-w-0 transition-opacity', stale && 'opacity-60')}>
           {stale && (
             <div className="muted mb-3 flex items-center gap-2 text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" /> Calcul en cours…
+              <Loader2 className="h-4 w-4 animate-spin" /> {computing ? 'Calcul en cours…' : 'Ajustement aux prix du marché…'}
             </div>
           )}
 
-          {input.assembled && !stale && variants.length === 0 && (
+          {input.assembled && !computing && variants.length === 0 && (
             <div className="card p-10 text-center">
               <p className="font-semibold">Aucune configuration compatible pour ce budget et ces critères.</p>
-              <p className="muted mt-1 text-sm">Augmentez le budget ou assouplissez les préférences.</p>
+              <p className="muted mt-1 text-sm">Aux prix actuels du marché, rien ne tient dans ce budget : augmentez-le ou assouplissez les préférences.</p>
             </div>
           )}
 
@@ -230,7 +250,7 @@ export function Generator() {
                         {v.key === 'best' && <span className="rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-2 py-0.5 text-xs font-semibold text-white">Meilleur choix</span>}
                       </div>
                       <p className="muted text-xs">{v.description}</p>
-                      <div className="mt-2 text-3xl font-bold"><Price value={totalPrice(v.build.resolved, prices.price)} subClassName="text-sm" /></div>
+                      <div className="mt-2 text-3xl font-bold"><Price value={totalPrice(v.build.resolved, shownPrice)} subClassName="text-sm" /></div>
                     </div>
                     <ScoreRing value={v.build.score} size={84} />
                   </header>
@@ -245,7 +265,7 @@ export function Generator() {
                     </div>
                   )}
                   <div className="mt-3 flex-1">
-                    <BuildParts resolved={v.build.resolved} price={prices.price} specs={false} />
+                    <BuildParts resolved={v.build.resolved} price={shownPrice} specs={false} />
                   </div>
                   <footer className="no-print mt-4 flex flex-wrap gap-2 [&>*]:flex-1">
                     <button className="btn btn-primary btn-sm" onClick={() => customize(b)}>
