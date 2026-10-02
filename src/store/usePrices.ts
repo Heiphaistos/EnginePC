@@ -23,7 +23,9 @@ export const plausible = (live: number, catalog: number) => !(catalog > 0) || (l
 
 const RETRY_AFTER_MS = 60_000
 const DEBOUNCE_MS = 300
-const BATCH_SIZE = 100
+// SearchIT traite 4 articles à la fois (~1 s chacun hors cache) et refuse plus de 50 articles par requête :
+// petits lots envoyés en parallèle, chacun sous son propre délai.
+const BATCH_SIZE = 8
 
 let version = 0
 const listeners = new Set<() => void>()

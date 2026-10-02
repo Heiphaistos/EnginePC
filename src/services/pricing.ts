@@ -123,7 +123,7 @@ export class HttpPriceProvider implements PriceProvider {
   }
 }
 
-const LOOKUP_TIMEOUT_MS = 10_000
+const LOOKUP_TIMEOUT_MS = 20_000
 const HEALTH_TIMEOUT_MS = 5_000
 
 /** Signal annulé par l'appelant ou au bout de `ms` millisecondes. */
