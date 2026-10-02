@@ -11,6 +11,8 @@ RUN npm run build
 
 # --- Runtime ---
 FROM nginx:alpine
+# upgrade : l image de base retarde sur les correctifs de securite Debian/Alpine (scan Trivy 2026-10-02).
+RUN apk upgrade --no-cache
 ARG VITE_PRICE_API_URL=""
 COPY deploy/nginx.docker.conf /etc/nginx/conf.d/default.conf
 COPY deploy/security-headers.conf /etc/nginx/snippets/security-headers.conf
